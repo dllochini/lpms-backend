@@ -30,7 +30,7 @@ connectDb();
 
 app.get('/api/users', async (req, res) => {
   try {
-    const results = await movies.find();
+    const results = await movies.find().limit(10);
     console.log(results.length,'results')
     res.json(results);
   } catch (error) {
