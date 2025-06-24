@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import mongodbConnection from "./src/configs/dbconfig.js";
-import movies from "./src/models/movies.js";
+import User from "./src/models/user.js";
 
 const app = express()
 const port = process.env.PORT || 3000;
@@ -20,6 +20,7 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+app.use(express.json())
 
 const connectDb = async () => {
   await mongodbConnection(process.env.DATABASE_URI, process.env.DATABASE_NAME);
@@ -30,7 +31,7 @@ connectDb();
 
 app.get('/api/users', async (req, res) => {
   try {
-    const results = await movies.find().limit(10);
+    const results = await User.find();
     console.log(results.length,'results')
     res.json(results);
   } catch (error) {
