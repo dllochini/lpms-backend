@@ -1,8 +1,8 @@
-import User from '../models/user.js'
+import { getAllUsers,createUser } from '../repositories/user.js';
 
 export const getUsers = async (req, res) => {
   try {
-    const results = await User.find();
+    const results = await getAllUsers();
     console.log(results.length,'results')
     res.json(results);
   } catch (error) {
@@ -10,11 +10,10 @@ export const getUsers = async (req, res) => {
   }
 }
 
-export const addUser = async (req, res) => {
+export const addNewUser = async (req, res) => {
   try {
-    const newUser = new User(req.body);
-    const savedUser = await newUser.save();
-    res.status(201).json(savedUser); // ✅ This is crucial
+    const savedUser = await createUser(req.body);
+    res.status(201).json(savedUser);
   } catch (error) {
     console.error("Error saving user:", error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -23,5 +22,6 @@ export const addUser = async (req, res) => {
 
 export default{
     getUsers,
-    addUser,
+    addNewUser,
 }
+
