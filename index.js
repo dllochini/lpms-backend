@@ -1,11 +1,10 @@
 import express from "express";
 import cors from "cors";
 import mongodbConnection from "./src/configs/dbconfig.js";
-import movies from "./src/models/movies.js";
+import userController from "./src/routes/user.js";
 
 const app = express()
 const port = process.env.PORT || 3000;
-
 
 const allowedOrigins = [process.env.FRONTEND_URL];
 
@@ -20,6 +19,7 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+app.use(express.json())
 
 const connectDb = async () => {
   await mongodbConnection(process.env.DATABASE_URI, process.env.DATABASE_NAME);
@@ -28,15 +28,17 @@ const connectDb = async () => {
 
 connectDb();
 
-app.get('/api/users', async (req, res) => {
-  try {
-    const results = await movies.find().limit(10);
-    console.log(results.length,'results')
-    res.json(results);
-  } catch (error) {
-    console.log(error)
-  }
-});
+// app.get('/api/users', async (req, res) => {
+//   try {
+//     const results = await User.find();
+//     console.log(results.length,'results')
+//     res.json(results);
+//   } catch (error) {
+//     console.log(error)
+//   }
+// });
+
+app.use('/api/users',userController)
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
