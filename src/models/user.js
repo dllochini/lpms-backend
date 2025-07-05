@@ -5,8 +5,10 @@ const userSchema = new Schema({
   // _id:String,
   firstName: String, // String is shorthand for {type: String}
   lastName: String,
+  fullName: String,
   email:String,
   nic:String,
+  contact_no: String,
 });
 
 export default mongoose.model("User", userSchema, "user");
