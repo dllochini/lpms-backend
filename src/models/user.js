@@ -3,6 +3,8 @@ const { Schema } = mongoose;
 
 const userSchema = new Schema({
   // _id:String,
+  designation: String,
+  role: String,
   firstName: String, // String is shorthand for {type: String}
   lastName: String,
   fullName: String,

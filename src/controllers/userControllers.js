@@ -1,5 +1,6 @@
 import { getAllUsers,createUser } from '../repositories/user.js';
 
+//get Users
 export const getUsers = async (req, res) => {
   try {
     const results = await getAllUsers();
@@ -10,6 +11,7 @@ export const getUsers = async (req, res) => {
   }
 }
 
+//add Users
 export const addNewUser = async (req, res) => {
   try {
     const savedUser = await createUser(req.body);
