@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import mongodbConnection from "./src/configs/dbconfig.js";
 import userController from "./src/routes/user.js";
+import landController from "./src/routes/land.js";
 
 //Initializes the Express app
 const app = express()
@@ -36,6 +37,7 @@ connectDb();
 
 //routing
 app.use('/api/users',userController)
+app.use('/api/lands',landController)
 
 //server starts
 app.listen(port, () => {
