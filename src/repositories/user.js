@@ -1,7 +1,11 @@
-import User from '../models/user.js';
+import User from "../models/user.js";
 
 export const getAllUsers = async () => {
   return await User.find();
+};
+
+export const getUser = async (userId) => {
+  return await User.findById(userId);
 };
 
 export const createUser = async (userData) => {
@@ -9,7 +13,17 @@ export const createUser = async (userData) => {
   return await newUser.save();
 };
 
-export default{
-    getAllUsers,
-    createUser,
-} 
+export const updateUser = async (userId, updatedData) => {
+  return await User.findByIdAndUpdate(userId, updatedData, { new: true });
+};
+
+export const deleteUser = async (userId) => {
+  return await User.findByIdAndDelete(userId);
+};
+
+export default {
+  getAllUsers,
+  createUser,
+  updateUser,
+  deleteUser,
+};
