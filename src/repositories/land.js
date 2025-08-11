@@ -1,10 +1,10 @@
-import Land from '../models/land.js';
+import Land from "../models/land.js";
 
 export const createLand = async (landData) => {
-  const newLand = new Land(landData);
-  return await newLand.save();
+  const newLand = await Land.create(landData);
+  return newLand;
 };
 
-export default{
-    createLand,
-} 
+export default {
+  createLand,
+};

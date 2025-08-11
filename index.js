@@ -1,8 +1,9 @@
 import express from "express";
 import cors from "cors";
 import mongodbConnection from "./src/configs/dbconfig.js";
-import userController from "./src/routes/user.js";
-import landController from "./src/routes/land.js";
+import userRouter from "./src/routes/user.js";
+import landRouter from "./src/routes/land.js";
+import roleRouter from "./src/routes/role.js";
 
 //Initializes the Express app
 const app = express()
@@ -36,8 +37,9 @@ const connectDb = async () => {
 connectDb();
 
 //routing
-app.use('/api/users',userController)
-app.use('/api/lands',landController)
+app.use('/api/users',userRouter)
+app.use('/api/lands',landRouter)
+app.use('/api/roles',roleRouter)
 
 //server starts
 app.listen(port, () => {
