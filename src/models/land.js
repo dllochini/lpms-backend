@@ -5,7 +5,7 @@ const landSchema = new Schema({
   area: Number,
   division: String,
   addressLine1: String,
-  addressLine2: String ,
+  addressLine2: String,
   city: String,
   district: String,
 });
