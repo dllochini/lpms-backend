@@ -1,15 +1,36 @@
-import User from '../models/user.js';
+import User from "../models/user.js";
 
 export const getAllUsers = async () => {
-  return await User.find();
+  const users = await User.find().populate("role", "role");
+  return users;
+};
+
+export const getUser = async (userId) => {
+  const user = await User.findById(userId);
+  return user;
 };
 
 export const createUser = async (userData) => {
-  const newUser = new User(userData);
-  return await newUser.save();
+  const newUser = await User.create(userData);
+  return newUser;
 };
 
-export default{
-    getAllUsers,
-    createUser,
-} 
+export const updateUser = async (userId, updatedData) => {
+  const updatedUser = await User.findByIdAndUpdate(userId, updatedData, {
+    new: true,
+  });
+  return updatedUser;
+};
+
+export const deleteUser = async (userId) => {
+  const deletedUser = await User.findByIdAndDelete(userId);
+  return deletedUser;
+};
+
+export default {
+  getAllUsers,
+  getUser,
+  createUser,
+  updateUser,
+  deleteUser,
+};
