@@ -1,5 +1,4 @@
-// repositories/userRepository.js
-import UserLogin from '../models/UserLogin.js'; // updated path & casing
+import UserLogin from '../models/UserLogin.js'; 
 
 // Fetch all users without returning their password field
 export const getAllUsers = async () => {

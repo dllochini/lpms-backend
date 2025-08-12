@@ -49,7 +49,7 @@ import mongodbConnection from "./src/configs/dbconfig.js";
 import userController from "./src/routes/user_login.js";
 
 const app = express()
-const port = process.env.PORT || 5173;
+const port = process.env.PORT || 3000;
 
 const allowedOrigins = [process.env.FRONTEND_URL];
 
