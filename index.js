@@ -46,8 +46,8 @@
 import express from "express";
 import cors from "cors";
 import mongodbConnection from "./src/configs/dbconfig.js";
-import LoginRouter from "./src/routes/user_login.js"; 
-import userRouter from "./src/routes/user.js"; //methana blnna
+import LoginRouter from "./src/routes/login.js"; 
+import userRouter from "./src/routes/user.js";
 import landRouter from "./src/routes/land.js";
 import roleRouter from "./src/routes/role.js";
 

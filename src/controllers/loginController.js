@@ -1,4 +1,4 @@
-import { getAllUsers } from '../repositories/user_login.js';
+import { getAllUsers } from '../repositories/login.js';
 
 export const getUsers = async (req, res) => {
   try {
