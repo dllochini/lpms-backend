@@ -1,4 +1,4 @@
-import UserLogin from '../models/UserLogin.js'; 
+import UserLogin from '../models/user_login.js'; 
 
 // Fetch all users without returning their password field
 export const getAllUsers = async () => {

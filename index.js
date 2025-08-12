@@ -46,7 +46,7 @@
 import express from "express";
 import cors from "cors";
 import mongodbConnection from "./src/configs/dbconfig.js";
-import userController from "./src/routes/user_login.js"; 
+import LoginRouter from "./src/routes/user_login.js"; 
 import userRouter from "./src/routes/user.js"; //methana blnna
 import landRouter from "./src/routes/land.js";
 import roleRouter from "./src/routes/role.js";
@@ -92,11 +92,12 @@ connectDb();
 //   }
 // });
 
-app.use('/api/users',userController) //methana blnna
+//app.use('/api/users',userController) 
 //routing
-app.use('/api/users',userRouter) //methana blnna
-app.use('/api/lands',landRouter) //methana blnna
-app.use('/api/roles',roleRouter)  //methana blnna
+app.use('/api/login',LoginRouter)
+app.use('/api/users',userRouter) 
+app.use('/api/lands',landRouter) 
+app.use('/api/roles',roleRouter)  
 
 //server starts
 app.listen(port, () => {
