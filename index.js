@@ -50,6 +50,7 @@ import LoginRouter from "./src/routes/login.js";
 import userRouter from "./src/routes/user.js";
 import landRouter from "./src/routes/land.js";
 import roleRouter from "./src/routes/role.js";
+import unitRouter from "./src/routes/unit.js";
 
 //Initializes the Express app
 const app = express()
@@ -97,7 +98,8 @@ connectDb();
 app.use('/api/login',LoginRouter)
 app.use('/api/users',userRouter) 
 app.use('/api/lands',landRouter) 
-app.use('/api/roles',roleRouter)  
+app.use('/api/roles',roleRouter) 
+app.use('/api/roles',unitRouter) 
 
 //server starts
 app.listen(port, () => {
