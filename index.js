@@ -38,7 +38,7 @@ connectDb();
 
 //app.use('/api/users',userController) 
 //routing
-app.use('/api/login',LoginRouter)
+app.use('/api/auth',LoginRouter)
 app.use('/api/users',userRouter) 
 app.use('/api/lands',landRouter) 
 app.use('/api/roles',roleRouter) 
