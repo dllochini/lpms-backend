@@ -6,6 +6,7 @@ import userRouter from "./src/routes/user.js";
 import landRouter from "./src/routes/land.js";
 import roleRouter from "./src/routes/role.js";
 import unitRouter from "./src/routes/unit.js";
+import operationRouter from "./src/routes/operation.js";
 
 //Initializes the Express app
 const app = express()
@@ -42,6 +43,7 @@ app.use('/api/users',userRouter)
 app.use('/api/lands',landRouter) 
 app.use('/api/roles',roleRouter) 
 app.use('/api/unit',unitRouter) 
+app.use('/api/operation',operationRouter)
 
 //server starts
 app.listen(port, () => {
