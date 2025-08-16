@@ -14,7 +14,7 @@ export const login = async (req, res) => {
       user
     });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(401).json({ error: error.message });
   }
 };
 
@@ -27,7 +27,7 @@ export const passwordReset = async (req, res) => {
     await resetPassword(email, newPassword);
     res.status(200).json({ message: "Password updated successfully" });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(401).json({ error: error.message });
   }
 };
 

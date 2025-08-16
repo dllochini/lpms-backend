@@ -5,7 +5,8 @@ import bcrypt from 'bcrypt';
  * Login user by email and password
  */
 export const loginUser = async (email, password) => {
-  const user = await User.findOne({ email }).populate("role", "role");
+  // const user = await User.findOne({ email }).populate("role", "role");
+  const user = await User.findOne({ email: email.toLowerCase() }).populate("role", "role");
 
   if (!user) {
     throw new Error("User not found");
@@ -15,24 +16,39 @@ export const loginUser = async (email, password) => {
   if (!isMatch) {
     throw new Error("Invalid credentials");
   }
+  //return user;
 
-  return user;
+  // remove password before returning
+  const userObj = user.toObject();
+  delete userObj.password;
+
+  return userObj;
 };
 
 /**
  * Reset password
  */
 export const resetPassword = async (email, newPassword) => {
-  const user = await User.findOne({ email });
+  //const user = await User.findOne({ email });
+ const user = await User.findOne({ email: email.toLowerCase() });
   if (!user) {
     throw new Error("User not found");
   }
 
-  const salt = await bcrypt.genSalt(10);
-  user.password = await bcrypt.hash(newPassword, salt);
+   // assigning new password will trigger pre("save") hook in model → password gets hashed
+  user.password = newPassword;
   await user.save();
 
-  return user;
+  const userObj = user.toObject();
+  delete userObj.password;
+
+  return userObj;
+  
+  // const salt = await bcrypt.genSalt(10);
+  // user.password = await bcrypt.hash(newPassword, salt);
+  // await user.save();
+
+  // return user;
 };
 
 export default {
