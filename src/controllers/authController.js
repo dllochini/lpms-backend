@@ -1,4 +1,4 @@
-import { loginUser, resetPassword } from '../repositories/auth.js';
+import { loginUser, resetPassword } from "../repositories/auth.js";
 
 /**
  * POST /login
@@ -11,8 +11,9 @@ export const login = async (req, res) => {
     // Here you could generate a JWT if needed
     res.status(200).json({
       message: "Login successful",
-      user
+      role: user.role.name, 
     });
+    
   } catch (error) {
     res.status(401).json({ error: error.message });
   }
@@ -33,5 +34,5 @@ export const passwordReset = async (req, res) => {
 
 export default {
   login,
-  passwordReset
+  passwordReset,
 };
