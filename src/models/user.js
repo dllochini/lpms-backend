@@ -17,6 +17,8 @@ const userSchema = new Schema({
   nic: String,
   contact_no: String,
   password: String,
+  resetPasswordToken: String,
+  resetPasswordExpires: Date,
 });
 
 userSchema.pre("save", async function (next) {
@@ -30,9 +32,5 @@ userSchema.pre("save", async function (next) {
     next(err);
   }
 });
-
-userSchema.methods.comparePassword = function (candidatePassword) {
-  return bcrypt.compare(candidatePassword, this.password);
-};
 
 export default mongoose.model("User", userSchema, "user");

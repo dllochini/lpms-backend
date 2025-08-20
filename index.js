@@ -15,12 +15,7 @@ import taskRouter from "./src/routes/task.js";
 const app = express()
 const port = process.env.PORT || 3000;
 
-//const allowedOrigins = [process.env.FRONTEND_URL];
-const allowedOrigins = [
-  "http://localhost:5173",      // your frontend dev server
-  "http://localhost:3000",      // if you run frontend on 3000 too
- // "https://your-frontend.com"   // your production frontend domain
-];
+const allowedOrigins = [process.env.FRONTEND_URL];
 
 
 const corsOptions = {
@@ -36,7 +31,7 @@ const corsOptions = {
 //Applies the CORS options.
 app.use(cors(corsOptions));
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// app.use(express.urlencoded({ extended: true }));
 
 //Connect to MongoDB
 const connectDb = async () => {
