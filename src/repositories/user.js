@@ -1,7 +1,7 @@
 import User from "../models/user.js";
 
 export const getAllUsers = async () => {
-  const users = await User.find().populate("role"); 
+  const users = await User.find().populate("role");
   return users;
 };
 
