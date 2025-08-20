@@ -16,7 +16,9 @@ const userSchema = new Schema({
   email: String,
   nic: String,
   contact_no: String,
-  password: String,
+  password: { type: String, required: true, select: false },
+  resetPasswordToken: String,
+  resetPasswordExpires: Date,
 });
 
 userSchema.pre("save", async function (next) {
