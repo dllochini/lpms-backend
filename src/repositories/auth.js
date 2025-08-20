@@ -4,74 +4,69 @@ import crypto from "crypto";
 import { sendResetEmail } from "../../utils/email.js"; // Assuming you have an email service to send reset emails
 
 export const loginUser = async (email, password) => {
-  const user = await User.findOne({ email: email.toLowerCase() }).populate(
-    "role"
-  );
-  // console.log("Login attempt :", email, password);
+  const user = await User.findOne({ email: email.toLowerCase() })
+    .select("+password")    // include password
+    .populate("role");
 
   if (!user) {
-    // console.log("Email not found");
-    throw new Error("Email not found");
+    // do not reveal whether the email exists
+    throw new Error("Invalid email or password");
   }
 
   const isMatch = await bcrypt.compare(password, user.password);
-  // console.log("Password match:", isMatch);
-
   if (!isMatch) {
-    // console.log("Incorect password");
-    throw new Error("Incorect password");
+    throw new Error("Invalid email or password");
   }
 
-  // remove password before returning
   const userObj = user.toObject();
   delete userObj.password;
-  // console.log("User found:", userObj);
   return userObj;
 };
 
+
 export const generateResetToken = async (email) => {
   const user = await User.findOne({ email: email.toLowerCase() });
-  // console.log("User found?", user);
   if (!user) throw new Error("User not found");
 
-  // Generate token
-  const token = crypto.randomBytes(20).toString("hex");
+  const token = crypto.randomBytes(32).toString("hex"); // longer token
+  const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
 
-  // Save token & expiration to user
-  user.resetPasswordToken = token;
+  user.resetPasswordToken = tokenHash;
   user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
   await user.save();
 
-  // Send email
-  const resetLink = `${process.env.FRONTEND_URL}/resetPassword?token=${token}`;
-  // console.log("RESET LINK:", resetLink);
-
+  const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
   await sendResetEmail(email, resetLink);
 
   return { message: "Password reset email sent" };
 };
 
-//Password reset function
+// reset
 export const resetPassword = async (token, newPassword) => {
-  // console.log("Call reached repository:", token, newPassword);
+  if (!token) throw new Error("Token is required");
+  if (!newPassword) throw new Error("Password is required");
+
+  // hash the token to match stored hash
+  const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+
+  // IMPORTANT: select the password explicitly because schema hides it by default
   const user = await User.findOne({
-    resetPasswordToken: token,
-    resetPasswordExpires: { $gt: Date.now() }, // ensure token not expired
-  });
+    resetPasswordToken: tokenHash,
+    resetPasswordExpires: { $gt: Date.now() },
+  }).select("+password"); // <- this is the critical change
 
   if (!user) throw new Error("Invalid or expired token");
 
-  const isMatch = await bcrypt.compare(newPassword, user.password);
-  // console.log("Password match:", isMatch);
-
-  if (isMatch) {
-    // console.log("Incorect password");
-    throw new Error("Enter a new password");
+  // user.password is now available; still validate defensively
+  if (!user.password) {
+    throw new Error("Stored password not available");
   }
 
-  // console.log("User found for reset:", newPassword);
+  // Ensure bcrypt.compare has both args
+  const isMatch = await bcrypt.compare(newPassword, user.password);
+  if (isMatch) throw new Error("Enter a new password");
 
-  user.password = newPassword; // triggers bcrypt pre-save hook
+  user.password = newPassword; // triggers pre 'save' hashing middleware
   user.resetPasswordToken = undefined;
   user.resetPasswordExpires = undefined;
   await user.save();
