@@ -5,7 +5,7 @@ const { Schema } = mongoose;
 const  resourceSchema = new Schema(
   {
     // _id: String,
-    unit: {
+    unitID: {
     type: Schema.Types.ObjectId,
     ref: "Unit",
     required: true,
@@ -15,4 +15,4 @@ const  resourceSchema = new Schema(
         
   });
 
-export default mongoose.model("Resource",  resourceSchema,"resource");
+export default mongoose.model("Resource",  resourceSchema,"resources");
