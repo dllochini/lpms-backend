@@ -6,19 +6,21 @@ export const addNewResource = async (data) => {
   return newResource;
 };
 
-export const getResources = async () => {
-  const resources = await Resource.find().populate("unitID");
-  // console.log("In repo:",resources);
+export const getAllResources = async () => {
+  const resources = await Resource.find().populate("unit", "name");
+  console.log("In repo:", resources);
   return resources;
 };
 
 export const getResourceById = async (id) => {
-  const resource = await Resource.findById(id).populate("unit");
+  const resource = await Resource.findById(id).populate("unit", "name");
   return resource;
 };
 
-export const updateResourceById = async (id, data) => {
-  const updateResource = await Resource.findByIdAndUpdate(id, data, { new: true });
+export const updateResource = async (id, data) => {
+  const updateResource = await Resource.findByIdAndUpdate(id, data, {
+    new: true,
+  });
   return updateResource;
 };
 
@@ -28,10 +30,9 @@ export const deleteResourceUserById = async (id) => {
 };
 
 export default {
-  addNewResource,
-  getResources,
+  createResource,
+  getAllResources,
   getResourceById,
-  updateResourceById,
-  deleteResourceUserById,
+  updateResource,
+  deleteResource,
 };
-

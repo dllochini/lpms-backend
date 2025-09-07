@@ -1,14 +1,13 @@
 // src/routes/resourceRoutes.js
 import express from "express";
-import { createResource, getAllResources, getResource, updateResource, deleteResource } from "../controllers/resourceController.js";
+import * as resourceController from "../controllers/resourceController.js";
 
 const router = express.Router();
 
-
-router.post("/", createResource);
-router.get("/", getAllResources);
-router.get("/:id", getResource);
-router.put("/:id", updateResource);
-router.delete("/:id", deleteResource);
+router.post("/", resourceController.createResource);
+router.get("/", resourceController.getAllResources);
+router.get("/:id", resourceController.getResourceById);
+router.put("/:id", resourceController.updateResource);
+router.delete("/:id", resourceController.deleteResource);
 
 export default router;
