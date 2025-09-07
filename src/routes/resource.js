@@ -4,7 +4,6 @@ import * as resourceController from "../controllers/resourceController.js";
 
 const router = express.Router();
 
-
 router.post("/", resourceController.createResource);
 router.get("/", resourceController.getAllResources);
 router.get("/:id", resourceController.getResourceById);
