@@ -1,4 +1,3 @@
-
 import Land from "../models/land.js";
 
 export const getAllLands = async () => {
