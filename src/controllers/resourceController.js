@@ -1,6 +1,10 @@
-// import {createResource, getAllResources, getResourceById, updateResource, deleteResource, addNewResource} from "../repositories/resource.js";
-import addNewResource, { getResources, getResourceById, updateResourceById, deleteResourceUserById } from "../repositories/resource.js";
-
+import {
+  addNewResource,
+  deleteResource,
+  getResource,
+  getResources,
+  updateResource,
+} from "../repositories/resource.js";
 
 export const createResource = async (req, res) => {
   try {
@@ -18,7 +22,7 @@ export const getAllResources = async (req, res) => {
   try {
     console.log("In controller");
     const resources = await getResources();
-    console.log("response:",resources);
+    console.log("response:", resources);
     res.status(200).json(resources);
   } catch (error) {
     console.error(error);
@@ -28,9 +32,9 @@ export const getAllResources = async (req, res) => {
   }
 };
 
-export const getResource = async (req, res) => {
+export const getResourceById = async (req, res) => {
   try {
-    const resource = await getResourceById(req.params.id);
+    const resource = await getResource(req.params.id);
     if (!resource)
       return res.status(404).json({ message: "Resource not found" });
     res.status(200).json(resource);
@@ -42,12 +46,10 @@ export const getResource = async (req, res) => {
   }
 };
 
-export const updateResource = async (req, res) => {
+export const updateResourceById = async (req, res) => {
   try {
-    const updatedResource = await resourceRepo.updateResource(
-      req.params.id,
-      req.body
-    );
+    const updatedResource = await updateResource(req.params.id, req.body);
+
     if (!updatedResource)
       return res.status(404).json({ message: "Resource not found" });
     res.status(200).json(updatedResource);
@@ -59,9 +61,9 @@ export const updateResource = async (req, res) => {
   }
 };
 
-export const deleteResource = async (req, res) => {
+export const deleteResourceById = async (req, res) => {
   try {
-    const deletedResource = await resourceRepo.deleteResource(req.params.id);
+    const deletedResource = await deleteResource(req.params.id);
     if (!deletedResource)
       return res.status(404).json({ message: "Resource not found" });
     res.status(200).json({ message: "Resource deleted successfully" });
@@ -77,6 +79,6 @@ export default {
   createResource,
   getAllResources,
   getResourceById,
-  updateResource,
-  deleteResource,
+  updateResourceById,
+  deleteResourceById,
 };
