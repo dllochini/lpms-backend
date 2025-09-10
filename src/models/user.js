@@ -1,3 +1,5 @@
+
+
 import mongoose from "mongoose";
 const { Schema } = mongoose;
 import bcrypt from "bcrypt";
@@ -10,8 +12,8 @@ const userSchema = new Schema({
     ref: "Role",
     required: true,
   },
-  firstName: String,
-  lastName: String,
+  // firstName: String,
+  // lastName: String,
   fullName: String,
   email: String,
   nic: String,
