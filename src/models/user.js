@@ -21,6 +21,50 @@ const userSchema = new Schema({
   password: { type: String, required: true, select: false },
   resetPasswordToken: String,
   resetPasswordExpires: Date,
+
+  created_at: {
+    type: Date,
+    required: true,
+    default: Date.now,
+  },
+  created_by: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
+    default: null,
+  },
+  updated_by: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
+    default: null,
+  },
+  updated_at: {
+    type: Date,
+    default: null,
+  },
+  address: {
+    type: String,
+    default: null,
+  },
+  bank: {
+    type: String,
+    default: null,
+  },
+  branch: {
+    type: String,
+    default: null,
+  },
+  account_Number: {
+    type: Number,
+    default: null,
+  },
+  passport_number: {
+    type: Number,
+    default: null,
+  },
+  designation: {
+    type: String,
+    default: null,
+  },
 });
 
 userSchema.pre("save", async function (next) {
@@ -36,3 +80,5 @@ userSchema.pre("save", async function (next) {
 });
 
 export default mongoose.model("User", userSchema, "user");
+
+    
