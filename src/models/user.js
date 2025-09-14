@@ -6,7 +6,6 @@ import bcrypt from "bcrypt";
 
 const userSchema = new Schema({
   // _id:String,
-  designation: String,
   role: {
     type: Schema.Types.ObjectId,
     ref: "Role",
@@ -15,8 +14,8 @@ const userSchema = new Schema({
   // firstName: String,
   // lastName: String,
   fullName: String,
-  email: String,
   nic: String,
+  email: String,
   contact_no: String,
   password: { type: String, required: true, select: false },
   resetPasswordToken: String,
@@ -30,15 +29,6 @@ const userSchema = new Schema({
   created_by: {
     type: Schema.Types.ObjectId,
     ref: "User",
-    default: null,
-  },
-  updated_by: {
-    type: Schema.Types.ObjectId,
-    ref: "User",
-    default: null,
-  },
-  updated_at: {
-    type: Date,
     default: null,
   },
   address: {
@@ -59,6 +49,11 @@ const userSchema = new Schema({
   },
   passport_number: {
     type: Number,
+    default: null,
+  },
+   updated_by: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
     default: null,
   },
   designation: {
