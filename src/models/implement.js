@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
 const { Schema } = mongoose;
 
-const OperationSchema = new Schema(
+const ImplementSchema = new Schema(
   {
-    //operationID: { type: String, required: true, unique: true }, // PK
+    //implementID: { type: String, required: true, unique: true }, // PK
     name: { type: String, required: true },
     created_at: { type: Date, default: Date.now },
     created_by: { type: String },
@@ -13,4 +13,4 @@ const OperationSchema = new Schema(
   
 );
 
-export default mongoose.model("Operation", OperationSchema,"operation");
+export default mongoose.model("Implement", ImplementSchema,"implement");
