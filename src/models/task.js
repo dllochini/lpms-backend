@@ -3,12 +3,12 @@ const { Schema } = mongoose;
 
 const taskSchema = new Schema(
   {
-    processID: {
+    process: {
       type: Schema.Types.ObjectId,
       ref: "Process",
       required: true,
     },
-    operationID: {
+    operation: {
       type: Schema.Types.ObjectId,
       ref: "Operation",
       required: true,

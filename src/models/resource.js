@@ -7,7 +7,7 @@ const resourceSchema = new Schema(
     // Primary Key: Mongoose automatically creates _id, we can alias it to resourceID
     _id: { type: Schema.Types.ObjectId, auto: true, alias: "resourceID" },
 
-    unitID: {
+    unit: {
       type: Schema.Types.ObjectId,
       ref: "Unit",
       required: false, // nullable

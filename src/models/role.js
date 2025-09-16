@@ -3,7 +3,7 @@ const { Schema } = mongoose;
 
 const roleSchema = new Schema(
   {
-    roleID: { type: Schema.Types.ObjectId, auto: true }, // PK
+    role: { type: Schema.Types.ObjectId, auto: true }, // PK
     name: { type: String, required: true },
 
     created_at: { type: Date, default: Date.now },

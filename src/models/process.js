@@ -3,7 +3,7 @@ const { Schema } = mongoose;
 
 const processSchema = new Schema({
   //processID: 
-  landID: { 
+  land: { 
     type: Schema.Types.ObjectId, 
     ref: "Land",  // Assuming you have a Land collection
     required: true 
