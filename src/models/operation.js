@@ -9,8 +9,7 @@ const OperationSchema = new Schema(
     created_by: { type: String },
     updated_at: { type: Date },
     updated_by: { type: String },
-  },
-  
+  }
 );
 
 export default mongoose.model("Operation", OperationSchema,"operation");
