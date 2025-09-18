@@ -1,11 +1,9 @@
-
-
 import mongoose from "mongoose";
 const { Schema } = mongoose;
 import bcrypt from "bcrypt";
 
 const userSchema = new Schema({
-  designation: String,
+  // _id:String,
   role: {
     type: Schema.Types.ObjectId,
     ref: "Role",
@@ -20,13 +18,53 @@ const userSchema = new Schema({
   // firstName: String,
   // lastName: String,
   fullName: String,
-  email: String,
   nic: String,
+  email: String,
   contact_no: String,
   customId: { type: String, unique: true }, // <-- here
   password: { type: String, required: true, select: false },
   resetPasswordToken: String,
   resetPasswordExpires: Date,
+
+  created_at: {
+    type: Date,
+    required: true,
+    default: Date.now,
+  },
+  created_by: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
+    default: null,
+  },
+  address: {
+    type: String,
+    default: null,
+  },
+  bank: {
+    type: String,
+    default: null,
+  },
+  branch: {
+    type: String,
+    default: null,
+  },
+  account_Number: {
+    type: Number,
+    default: null,
+  },
+  passport_number: {
+    type: Number,
+    default: null,
+  },
+   updated_by: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
+    default: null,
+  },
+  designation: {
+    type: String,
+    default: null,
+  },
 });
 
 userSchema.pre("save", async function (next) {
@@ -47,3 +85,5 @@ userSchema.pre("save", async function (next) {
 });
 
 export default mongoose.model("User", userSchema, "user");
+
+    
