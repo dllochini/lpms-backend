@@ -4,25 +4,24 @@ import crypto from "crypto";
 import { sendResetEmail } from "../../utils/email.js"; // Assuming you have an email service to send reset emails
 
 export const loginUser = async (email, password) => {
-  const user = await User.findOne({ email: email.toLowerCase() })
-    .select("+password")    // include password
-    .populate("role");
+  const user = await User.findOne({ email: email.toLowerCase() }).populate("role").select("+password");
 
+  // console.log("User found:", user); // Debugging line
+  
   if (!user) {
     // do not reveal whether the email exists
-    throw new Error("Invalid email or password");
+    throw new Error("Invalid email");
   }
 
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {
-    throw new Error("Invalid email or password");
+    throw new Error("Invalid password");
   }
 
   const userObj = user.toObject();
   delete userObj.password;
   return userObj;
 };
-
 
 export const generateResetToken = async (email) => {
   const user = await User.findOne({ email: email.toLowerCase() });
@@ -35,7 +34,7 @@ export const generateResetToken = async (email) => {
   user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
   await user.save();
 
-  const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
+  const resetLink = `${process.env.FRONTEND_URL}/resetPassword?token=${token}`;
   await sendResetEmail(email, resetLink);
 
   return { message: "Password reset email sent" };

@@ -15,23 +15,27 @@ const signToken = (user) => {
 
 export const login = async (req, res) => {
   try {
+    // console.log(req.body);
     const { email, password } = req.body;
     const user = await loginUser(email, password); // returns user object without password
 
     // Sign JWT
     const token = signToken(user);
-
+    // console.log(user);
+    // console.log("token:", token);
     // Send token + role
     res.status(200).json({
       message: "Login successful",
+      loggedUserId: user._id,
       role: user.role?.name || user.role,
+      name: user.fullName,
       token,
     });
+    // console.log("Login successful",user.fullName);
   } catch (error) {
     res.status(401).json({ error: error.message });
   }
 };
-
 
 //forgot password
 export const forgotPassword = async (req, res) => {
@@ -49,6 +53,7 @@ export const forgotPassword = async (req, res) => {
 //reset password
 export const resetPasswordController = async (req, res) => {
   try {
+    // console.log(req.body); //
     const { token, password } = req.body;
 
     if (!token) {
