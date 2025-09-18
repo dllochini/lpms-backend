@@ -35,6 +35,10 @@ export const getUserById = async (req, res) => {
 //add Users
 export const addNewUser = async (req, res) => {
   try {
+    console.log("In controller:", req.body); // Log the request body
+    if (!req.body.division) {
+      delete req.body.division; // removes empty string field
+    }
     const savedUser = await createUser(req.body);
     res.status(201).json(savedUser);
   } catch (error) {
@@ -47,6 +51,9 @@ export const addNewUser = async (req, res) => {
 export const updateUserById = async (req, res) => {
   const userId = req.params.id;
   try {
+    if (!req.body.division) {
+      delete req.body.division; // removes empty string field
+    }
     const updatedUser = await updateUser(userId, req.body);
     if (!updatedUser) {
       return res.status(404).json({ error: "User not found" });
