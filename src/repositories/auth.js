@@ -4,10 +4,12 @@ import crypto from "crypto";
 import { sendResetEmail } from "../../utils/email.js"; // Assuming you have an email service to send reset emails
 
 export const loginUser = async (email, password) => {
-  const user = await User.findOne({ email: email.toLowerCase() }).populate("role").select("+password");
+  const user = await User.findOne({ email: email.toLowerCase() })
+    .populate("role")
+    .select("+password");
 
   // console.log("User found:", user); // Debugging line
-  
+
   if (!user) {
     // do not reveal whether the email exists
     throw new Error("Invalid email");
@@ -23,7 +25,11 @@ export const loginUser = async (email, password) => {
   return userObj;
 };
 
-export const generateResetToken = async (email) => {
+export const generateResetToken = async (Objdata) => {
+  const { email, identifier } = Objdata;
+  // console.log("in rep:",email,"identitiy:",identifier);
+  // console.log(email);
+
   const user = await User.findOne({ email: email.toLowerCase() });
   if (!user) throw new Error("User not found");
 
@@ -35,9 +41,15 @@ export const generateResetToken = async (email) => {
   await user.save();
 
   const resetLink = `${process.env.FRONTEND_URL}/resetPassword?token=${token}`;
-  await sendResetEmail(email, resetLink);
+  if (identifier == "Forgot") {
+    await sendResetEmail(email, resetLink);
+    return { message: "Password reset email sent"};
+  }
 
-  return { message: "Password reset email sent" };
+  if (identifier == "Profile") {
+    // console.log("Profile!");
+    return { message: "Password reset email sent", resetLink };
+  }
 };
 
 // reset

@@ -40,10 +40,12 @@ export const login = async (req, res) => {
 //forgot password
 export const forgotPassword = async (req, res) => {
   try {
-    const { email } = req.body;
-    // console.log(req.body); //
+    // console.log("in method",req.body);
+    const objData = req.body;
+    // console.log("in controller", objData);
 
-    const result = await generateResetToken(email);
+    const result = await generateResetToken(objData);
+    // console.log("result", result);
     res.status(200).json(result);
   } catch (error) {
     res.status(400).json({ error: error.message });
