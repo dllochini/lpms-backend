@@ -11,7 +11,9 @@ import operationRouter from "./src/routes/operation.js";
 import resourceRouter from "./src/routes/resource.js";
 import workDoneRouter from "./src/routes/workDone.js";
 import taskRouter from "./src/routes/task.js";
+import divisionRouter from "./src/routes/divison.js";
 import { protect } from "./middleware/auth.js";
+import implementRouter from "./src/routes/implement.js";
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -49,11 +51,13 @@ app.use("/api", protect);
 app.use("/api/users", userRouter);
 app.use("/api/lands", landRouter);
 app.use("/api/roles", roleRouter);
+app.use("/api/divisions", divisionRouter);
 app.use("/api/unit", unitRouter);
 app.use("/api/operation", operationRouter);
 app.use("/api/resource", resourceRouter);
 app.use("/api/workDone", workDoneRouter);
 app.use("/api/tasks", taskRouter);
+app.use("/api/implements", implementRouter);
 
 // start server
 app.listen(port, () => {
