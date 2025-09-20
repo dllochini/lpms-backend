@@ -11,9 +11,11 @@ import operationRouter from "./src/routes/operation.js";
 import resourceRouter from "./src/routes/resource.js";
 import workDoneRouter from "./src/routes/workDone.js";
 import taskRouter from "./src/routes/task.js";
-import divisionRouter from "./src/routes/divison.js";
-import { protect } from "./middleware/auth.js";
+import divisionRouter from "./src/routes/division.js";
 import implementRouter from "./src/routes/implement.js";
+import managerRouter from "./src/routes/managerDashboard.js";
+
+import { protect } from "./middleware/auth.js";
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -58,6 +60,7 @@ app.use("/api/resource", resourceRouter);
 app.use("/api/workDone", workDoneRouter);
 app.use("/api/tasks", taskRouter);
 app.use("/api/implements", implementRouter);
+app.use("/api/managers", managerRouter);
 
 // start server
 app.listen(port, () => {

@@ -10,7 +10,7 @@ import {
 export const getLands = async (req, res) => {
   try {
     const results = await getAllLands();
-    console.log(results.length, "lands found");
+    console.log(results.length, "lands found ");
     res.json(results);
   } catch (error) {
     console.error("Error fetching lands:", error);
