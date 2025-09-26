@@ -3,7 +3,7 @@ const { Schema } = mongoose;
 
 const billSchema = new Schema(
   {
-    //billID: 
+    //billID:
     process: {
       type: Schema.Types.ObjectId,
       ref: "Process",
