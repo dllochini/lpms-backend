@@ -3,7 +3,7 @@ const { Schema } = mongoose;
 import bcrypt from "bcrypt";
 
 const userSchema = new Schema({
-  // _id:String,
+  customId: { type: String, unique: true }, // <-- here
   role: {
     type: Schema.Types.ObjectId,
     ref: "Role",
@@ -15,23 +15,16 @@ const userSchema = new Schema({
     required: false,
     default: null,
   },
-  // firstName: String,
-  // lastName: String,
   fullName: String,
   nic: String,
   email: String,
-  contact_no: String,
-  customId: { type: String, unique: true }, // <-- here
+  contactNo: String,
   password: { type: String, required: true, select: false },
   resetPasswordToken: String,
   resetPasswordExpires: Date,
 
-  created_at: {
-    type: Date,
-    required: true,
-    default: Date.now,
-  },
-  created_by: {
+ 
+  createdBy: {
     type: Schema.Types.ObjectId,
     ref: "User",
     default: null,
@@ -48,15 +41,15 @@ const userSchema = new Schema({
     type: String,
     default: null,
   },
-  account_Number: {
+  accountNumber: {
     type: Number,
     default: null,
   },
-  passport_number: {
+  passportNumber: {
     type: Number,
     default: null,
   },
-   updated_by: {
+  updatedBy: {
     type: Schema.Types.ObjectId,
     ref: "User",
     default: null,
@@ -65,7 +58,18 @@ const userSchema = new Schema({
     type: String,
     default: null,
   },
-});
+  updateHistory: [
+    {
+      updatedAt: Date,
+      updatedBy: { type: Schema.Types.ObjectId, ref: "User" },
+      changes: String,
+    },
+  ],
+  
+  
+},
+{ timestamps: true }
+);
 
 userSchema.pre("save", async function (next) {
   if (this.isModified("password")) {
@@ -86,4 +90,3 @@ userSchema.pre("save", async function (next) {
 
 export default mongoose.model("User", userSchema, "user");
 
-    
