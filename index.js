@@ -12,6 +12,7 @@ import resourceRouter from "./src/routes/resource.js";
 import workDoneRouter from "./src/routes/workDone.js";
 import taskRouter from "./src/routes/task.js";
 import divisionRouter from "./src/routes/divison.js";
+import fieldOfficerDashboardRouter from "./src/routes/fieldOfficerDashboard.js";
 import { protect } from "./middleware/auth.js";
 import implementRouter from "./src/routes/implement.js";
 
@@ -58,6 +59,7 @@ app.use("/api/resource", resourceRouter);
 app.use("/api/workDone", workDoneRouter);
 app.use("/api/tasks", taskRouter);
 app.use("/api/implements", implementRouter);
+app.use("/api/fieldOfficer", fieldOfficerDashboardRouter);
 
 // start server
 app.listen(port, () => {
