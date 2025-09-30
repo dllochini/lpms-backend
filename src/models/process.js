@@ -2,17 +2,18 @@ import mongoose from "mongoose";
 const { Schema } = mongoose;
 
 const processSchema = new Schema({
-  //processID: 
+  _id: { type: String, unique: true },
+
   land: { 
     type: Schema.Types.ObjectId, 
     ref: "Land",  // Assuming you have a Land collection
     required: true 
   },
-  started_date: { 
+  startedDate: { 
     type: Date, 
     required: false 
   },
-  end_date: { 
+  endDate: { 
     type: Date, 
     required: false 
   },
@@ -20,7 +21,7 @@ const processSchema = new Schema({
     type: String, 
     maxlength: 255 
   },
-  update_history: [{ 
+  updateHistory: [{ 
     type: String // Assuming array of strings; change type if storing objects
   }]
 }, { timestamps: true });
