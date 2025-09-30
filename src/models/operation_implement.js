@@ -3,7 +3,7 @@ const { Schema } = mongoose;
 
 const operationImplementSchema = new Schema(
   {
-    op_Imp: {
+    opImp: {
       type: Schema.Types.ObjectId,
       required: true,
       unique: true,
@@ -25,4 +25,4 @@ const operationImplementSchema = new Schema(
   }
 );
 
-export default mongoose.model("Operation_Implement", operationImplementSchema,"operation_implement");
+export default mongoose.model("Operation_Implement", operationImplementSchema, "operation_implement");
