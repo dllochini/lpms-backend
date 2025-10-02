@@ -2,13 +2,14 @@ import mongoose from "mongoose";
 const { Schema } = mongoose;
 
 const taskSchema = new Schema(
-  {
+
     assignedTo: {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    processID: {
+
+    process: {
       type: Schema.Types.ObjectId,
       ref: "Process",
       required: true,
@@ -18,15 +19,15 @@ const taskSchema = new Schema(
       ref: "Operation",
       required: true,
     },
-    start_date: {
+    startDate: {
       type: Date,
       required: true,
     },
-    expected_end_date: {
+    expectedEndDate: {
       type: Date,
       required: true,
     },
-    end_date: {
+    endDate: {
       type: Date,
     },
     status: {
@@ -35,30 +36,24 @@ const taskSchema = new Schema(
       maxlength: 500,
       trim: true,
     },
-    created_at: {
-      type: Date,
-      default: Date.now,
-    },
-    created_by: {
+    createdBy: {
       type: Schema.Types.ObjectId,
       ref: "User",
     },
-    updated_at: {
-      type: Date,
-    },
-    updated_by: {
+    updatedBy: {
       type: Schema.Types.ObjectId,
       ref: "User",
     },
-    update_history: [
+    updateHistory: [
       {
-        updated_at: Date,
-        updated_by: { type: Schema.Types.ObjectId, ref: "User" },
+        updatedAt: Date,
+        updatedBy: { type: Schema.Types.ObjectId, ref: "User" },
         changes: String,
       },
     ],
   },
-  { versionKey: false }
+  { versionKey: false },
+  { timestamps: true }
 );
 
 export default mongoose.model("Task", taskSchema, "task");
