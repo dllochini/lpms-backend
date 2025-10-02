@@ -3,22 +3,22 @@ const { Schema } = mongoose;
 
 const billSchema = new Schema(
   {
-    //billID: 
+    _id: { type: String, unique: true },
     process: {
       type: Schema.Types.ObjectId,
       ref: "Process",
       required: true,
     },
-    total_amount: {
+    totalAmount: {
       type: String, // or Number if you prefer
     },
-    tasksub_total: [
+    taskSubTotal: [
       {
         type: Schema.Types.ObjectId,
         ref: "Task",
       },
     ],
-    workdonesub_total: [
+    workdoneSubTotal: [
       {
         type: Schema.Types.ObjectId,
         ref: "WorkDone",
@@ -28,16 +28,8 @@ const billSchema = new Schema(
     notes: {
       type: String,
     },
-    created_at: {
-      type: Date,
-      default: Date.now,
-    },
-    updated_at: {
-      type: Date,
-      default: Date.now,
-    },
   },
-  
+  { timestamps: true }
 );
 
 export default mongoose.model("Bill", billSchema,"bill");

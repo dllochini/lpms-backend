@@ -4,7 +4,7 @@ const { Schema } = mongoose;
 
 const divisionSchema = new Schema(
   {
-   // _id: { type: Schema.Types.ObjectId, auto: true, alias: "divisionID" }, // PK
+   _id: { type: String, unique: true },
     name: {
       type: String,
       maxlength: 255,

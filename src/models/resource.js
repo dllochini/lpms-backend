@@ -31,21 +31,17 @@ const resourceSchema = new Schema(
       trim: true,
       default: null,
     },
-    unit_Price: {
+    unitPrice: {
       type: Number,
       default: null,
     },
     
-    created_at: {
-      type: Date,
-      default: Date.now,
-    },
-    created_by: { type: Schema.Types.ObjectId, ref: "User", default: null },
-    updated_at: { type: Date, default: null },
-    updated_by: { type: Schema.Types.ObjectId, ref: "User", default: null },
+  
+    createdBy: { type: Schema.Types.ObjectId, ref: "User", default: null },
+    updatedBy: { type: Schema.Types.ObjectId, ref: "User", default: null },
   },
   {
-    timestamps: false, // we handle created_at manually
+    timestamps: true, // we handle created_at manually
   }
 );
 

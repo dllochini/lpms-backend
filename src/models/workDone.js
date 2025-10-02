@@ -18,19 +18,20 @@ const workDoneSchema = new Schema(
       ref: "Implement",
       required: true,
     },
-    start_date: { type: Date, default: null },
-    end_date: { type: Date, default: null },
+    startDate: { type: Date, default: null },
+    endDate: { type: Date, default: null },
     quantity: { type: Number, default: null },
 
     // Metadata fields
     notes: { type: String, default: "" },
-    created_at: { type: Date, default: Date.now },
-    created_by: { type: Schema.Types.ObjectId, ref: "User", default: null },
-    updated_at: { type: Date, default: null },
-    updated_by: { type: Schema.Types.ObjectId, ref: "User", default: null },
-    update_history: { type: [Schema.Types.Mixed], default: [] }, // Array for storing change logs
+    createdBy: { type: Schema.Types.ObjectId, ref: "User", default: null },
+    updatedBy: { type: Schema.Types.ObjectId, ref: "User", default: null },
+    updateHistory: { type: [Schema.Types.Mixed], default: [] }, // Array for storing change logs
   },
-  { versionKey: false }
+  
+  { versionKey: false },
+  { timestamps: true }
+ 
 );
 
 export default mongoose.model("WorkDone", workDoneSchema, "workDone");
