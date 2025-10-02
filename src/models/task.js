@@ -2,13 +2,13 @@ import mongoose from "mongoose";
 const { Schema } = mongoose;
 
 const taskSchema = new Schema(
-  {
-    _id: { type: String, unique: true },
+
     assignedTo: {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
+
     process: {
       type: Schema.Types.ObjectId,
       ref: "Process",
