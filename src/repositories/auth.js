@@ -26,7 +26,7 @@ export const loginUser = async (email, password) => {
 };
 
 export const generateResetToken = async (Objdata) => {
-  const { email, identifier } = Objdata;
+  const { email, identifier } = Objdata.data;
   // console.log("in rep:",email,"identitiy:",identifier);
   // console.log(email);
 

@@ -23,7 +23,15 @@ const landSchema = new Schema(
       },
     ],
   },
-  { timestamps: true } // ✅ auto-generates createdAt & updatedAt
-);
+  { timestamps: true }
+); // ✅ auto-generates createdAt & updatedAt
+
+landSchema.pre("save", async function (next) {
+  if (this.isNew) {
+    const count = await mongoose.model("Land").countDocuments();
+    this.landId = `LAND${(count + 1).toString().padStart(5, "0")}`;
+  }
+  next();
+});
 
 export default mongoose.model("Land", landSchema, "land");
