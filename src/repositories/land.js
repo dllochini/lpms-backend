@@ -15,7 +15,10 @@ export const getLand = async (landId) => {
 
 export const getLandsByFieldOfficer = async (fieldOfficerId) => {
   try {
-    const lands = await Land.find({ createdBy: fieldOfficerId });
+    const lands = await Land.find({ createdBy: fieldOfficerId })
+      .populate("farmer")
+      .populate("unit");
+    console.log("in repo", lands);
     return lands;
   } catch (error) {
     console.error("Error fetching lands by field officer:", error);
