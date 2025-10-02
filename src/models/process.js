@@ -1,29 +1,30 @@
 import mongoose from "mongoose";
 const { Schema } = mongoose;
 
-const processSchema = new Schema({
-  _id: { type: String, unique: true },
+const processSchema = new Schema(
+  {
+    // _id: { type: String, unique: true },
+    land: { type: Schema.Types.ObjectId, ref: "Land", required: true },
+    startedDate: { type: Date, required: false },
+    endDate: { type: Date, required: false },
+    status: { type: String, maxlength: 255, enum: ["Not started", "In Progress", "Done"], default: "Not started" },
+    updatedHistory: [
+      {
+        updatedAt: { type: Date, default: Date.now },
+        updatedBy: { type: Schema.Types.ObjectId, ref: "User" },
+        changes: { type: Schema.Types.Mixed }, // optional: track what changed
+      },
+    ],
+  },
+  { timestamps: true }
+);
 
-  land: { 
-    type: Schema.Types.ObjectId, 
-    ref: "Land",  // Assuming you have a Land collection
-    required: true 
-  },
-  startedDate: { 
-    type: Date, 
-    required: false 
-  },
-  endDate: { 
-    type: Date, 
-    required: false 
-  },
-  status: { 
-    type: String, 
-    maxlength: 255 
-  },
-  updateHistory: [{ 
-    type: String // Assuming array of strings; change type if storing objects
-  }]
-}, { timestamps: true });
+// processSchema.pre("save", async function (next) {
+//   if (this.isNew) {
+//     const count = await mongoose.model("Process").countDocuments();
+//     this._id = `PROCESS${(count + 1).toString().padStart(5, "0")}`;
+//   }
+//   next();
+// });
 
-export default mongoose.model("Process", processSchema,"process");
+export default mongoose.model("Process", processSchema, "process");

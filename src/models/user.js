@@ -6,59 +6,23 @@ const { Schema } = mongoose;
 const userSchema = new Schema(
   {
     customId: { type: String, unique: true }, // <-- here
-    role: {
-      type: Schema.Types.ObjectId,
-      ref: "Role",
-      required: true,
-    },
-    division: {
-      type: Schema.Types.ObjectId,
-      ref: "Division",
-      required: false,
-      default: null,
-    },
+    role: { type: Schema.Types.ObjectId, ref: "Role", required: true },
+    division: { type: Schema.Types.ObjectId, ref: "Division", default: null },
+    designation: { type: String, default: null },
     fullName: String,
     nic: String,
+    passportNumber: { type: Number, default: null },
     email: String,
+    address: { type: String, default: null },
+    accountNumber: { type: Number, default: null },
+    bank: { type: String, default: null },
+    branch: { type: String, default: null },
     contactNo: String,
     password: { type: String, required: true, select: false },
     resetPasswordToken: String,
     resetPasswordExpires: Date,
-
-    createdBy: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-      default: null,
-    },
-    address: {
-      type: String,
-      default: null,
-    },
-    bank: {
-      type: String,
-      default: null,
-    },
-    branch: {
-      type: String,
-      default: null,
-    },
-    accountNumber: {
-      type: Number,
-      default: null,
-    },
-    passportNumber: {
-      type: Number,
-      default: null,
-    },
-    updatedBy: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-      default: null,
-    },
-    designation: {
-      type: String,
-      default: null,
-    },
+    createdBy: { type: Schema.Types.ObjectId, ref: "User", default: null },
+    updatedBy: { type: Schema.Types.ObjectId, ref: "User", default: null },
     updateHistory: [
       {
         updatedAt: Date,

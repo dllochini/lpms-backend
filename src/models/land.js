@@ -3,7 +3,7 @@ const { Schema } = mongoose;
 
 const landSchema = new Schema(
   {
-    _id: { type: String, unique: true },
+    // _id: { type: String, unique: true },
     farmer: { type: Schema.Types.ObjectId, ref: "User", required: true },
     division: { type: Schema.Types.ObjectId, ref: "Division", required: true }, // divisionID (FK)
     unit: { type: Schema.Types.ObjectId, ref: "Unit" },
@@ -26,12 +26,12 @@ const landSchema = new Schema(
   { timestamps: true }
 ); // ✅ auto-generates createdAt & updatedAt
 
-landSchema.pre("save", async function (next) {
-  if (this.isNew) {
-    const count = await mongoose.model("Land").countDocuments();
-    this.landId = `LAND${(count + 1).toString().padStart(5, "0")}`;
-  }
-  next();
-});
+// landSchema.pre("save", async function (next) {
+//   if (this.isNew) {
+//     const count = await mongoose.model("Land").countDocuments();
+//     this._id = `LAND${(count + 1).toString().padStart(5, "0")}`;
+//   }
+//   next();
+// });
 
 export default mongoose.model("Land", landSchema, "land");
