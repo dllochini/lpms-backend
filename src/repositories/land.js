@@ -1,4 +1,7 @@
 import Land from "../models/land.js";
+import Process from "../models/process.js";
+import Task from "../models/task.js";
+import WorkDone from "../models/workDone.js";
 
 export const getAllLands = async () => {
   const lands = await Land.find();
@@ -8,6 +11,19 @@ export const getAllLands = async () => {
 export const getLand = async (landId) => {
   const land = await Land.findById(landId);
   return land;
+};
+
+export const getLandsByFieldOfficer = async (fieldOfficerId) => {
+  try {
+    const lands = await Land.find({ createdBy: fieldOfficerId })
+      .populate("farmer")
+      .populate("unit");
+    // console.log("in repo", lands);
+    return lands;
+  } catch (error) {
+    console.error("Error fetching lands by field officer:", error);
+    throw error;
+  }
 };
 
 export const createLand = async (landData) => {

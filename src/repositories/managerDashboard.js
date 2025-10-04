@@ -92,7 +92,7 @@ export const managerDashboardRepository = {
       processID: { $in: processIds },
       status: "sent for approval",
     })
-      .populate("processID", "landID").populate("assignedTo","fullName") // optional, include related process/land info
+      .populate("process", "land").populate("assignedTo","fullName") // optional, include related process/land info
       .lean();
 
     return tasks; // array of task objects

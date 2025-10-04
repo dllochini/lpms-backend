@@ -4,7 +4,7 @@ const { Schema } = mongoose;
 
 const divisionSchema = new Schema(
   {
-   _id: { type: String, unique: true },
+    // _id: { type: String, unique: true },
     name: {
       type: String,
       maxlength: 255,
@@ -12,10 +12,15 @@ const divisionSchema = new Schema(
       default: null, // Nullable
     },
   },
-  {
-    
-    timestamps: true, // optional: adds createdAt & updatedAt
-  }
+  { timestamps: true }
 );
 
-export default mongoose.model("Division", divisionSchema,"division");
+// divisionSchema.pre("save", async function (next) {
+//   if (this.isNew) {
+//     const count = await mongoose.model("Division").countDocuments();
+//     this._id = `DIVISION${(count + 1).toString().padStart(5, "0")}`;
+//   }
+//   next();
+// });
+
+export default mongoose.model("Division", divisionSchema, "division");

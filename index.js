@@ -61,6 +61,7 @@ app.use("/api/workDone", workDoneRouter);
 app.use("/api/tasks", taskRouter);
 app.use("/api/implements", implementRouter);
 app.use("/api/managers", managerRouter);
+app.use("/api/createUserLand", landRouter);
 
 // start server
 app.listen(port, () => {
