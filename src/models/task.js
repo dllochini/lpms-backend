@@ -6,11 +6,7 @@ const taskSchema = new Schema(
     // _id: { type: String, unique: true },
     assignedTo: { type: Schema.Types.ObjectId, ref: "User", required: true },
     process: { type: Schema.Types.ObjectId, ref: "Process", required: true },
-    operation: {
-      type: Schema.Types.ObjectId,
-      ref: "Operation",
-      required: true,
-    },
+    operation: { type: Schema.Types.ObjectId, ref: "Operation", required: true },
     startDate: { type: Date, required: true },
     expectedEndDate: { type: Date, required: true },
     endDate: { type: Date },
