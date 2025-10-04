@@ -1,4 +1,3 @@
-// src/controllers/createUserAndLand.js
 import { createUser } from "../repositories/user.js";
 import { createLand } from "../repositories/land.js";
 
@@ -9,27 +8,39 @@ export const createUserAndLand = async (req, res) => {
 
     const body = req.body || {};
 
-    const userAddress = body.address[0] || "";
-    const landAddress = body.address[1] || "";
+    // ✅ Safely extract addresses
+    const addresses = Array.isArray(body.address)
+      ? body.address
+      : [body.address];
+    const userAddress = addresses[0] || "";
+    const landAddress = addresses[1] || "";
 
-    // Build user payload
+    const createdBy = req.user?._id || body.createdBy || null;
+
+    // ✅ User payload
     const userPayload = {
       fullName: body.fullName,
       designation: body.designation,
       nic: body.nic,
       address: userAddress,
-      contact_no: body.contact_no,
-      accountNo: body.account_Number || body.accountNo,
+      contactNo: body.contact_no,
+      accountNo: body.accountNo || body.account_Number,
       bank: body.bank,
       branch: body.branch,
-      role: "686376157bac8e175bd885aa",
-      password: body.password, // optionally
-      created_by: req.user?._id || body.createdBy || null,
+      role: body.role || "686376157bac8e175bd885aa",
+      password: body.password,
+      createdBy,
+      updated_history: [
+        {
+          updatedAt: new Date(),
+          updatedBy: createdBy,
+          changes: "initial creation",
+        },
+      ],
     };
 
-    // Files from multer (match uploadFields names)
     const files = req.files || {};
-    if (files.farmerPhoto && files.farmerPhoto[0]) {
+    if (files.farmerPhoto?.[0]) {
       userPayload.nic_softcopy = {
         filename: files.farmerPhoto[0].filename,
         path: files.farmerPhoto[0].path,
@@ -38,29 +49,44 @@ export const createUserAndLand = async (req, res) => {
 
     const newUser = await createUser(userPayload);
 
-    // Build land payload
+    // ✅ Land payload
     const landPayload = {
-      user: newUser._id,
+      farmer: newUser._id,
       division: body.division,
       address: landAddress,
-      size: Number(body.size || body.landSize), 
+      size: Number(body.size || body.landSize),
       unit: body.unit || body.landUnit,
-      created_by: req.user?._id || body.createdBy || null,
+      createdBy,
+      updated_history: [
+        {
+          updatedAt: new Date(),
+          updatedBy: createdBy,
+          changes: `initial creation with user ${newUser._id}`,
+        },
+      ],
     };
 
-    // landPhoto
-    if (files.landPhoto && files.landPhoto[0]) {
-      landPayload.images = [{ filename: files.landPhoto[0].filename, path: files.landPhoto[0].path }];
+    if (files.landPhoto?.[0]) {
+      landPayload.images = [
+        {
+          filename: files.landPhoto[0].filename,
+          path: files.landPhoto[0].path,
+        },
+      ];
     }
 
-    // documents (may be multiple)
-    if (files.documents && files.documents.length) {
-      landPayload.documents = files.documents.map((f) => ({ filename: f.filename, path: f.path }));
+    if (files.documents?.length) {
+      landPayload.documents = files.documents.map((f) => ({
+        filename: f.filename,
+        path: f.path,
+      }));
     }
 
-    // signedAgreement (store on land)
-    if (files.signedAgreement && files.signedAgreement[0]) {
-      landPayload.signed_agreement = { filename: files.signedAgreement[0].filename, path: files.signedAgreement[0].path };
+    if (files.signedAgreement?.[0]) {
+      landPayload.signed_agreement = {
+        filename: files.signedAgreement[0].filename,
+        path: files.signedAgreement[0].path,
+      };
     }
 
     const newLand = await createLand(landPayload);

@@ -188,9 +188,7 @@ export const getLandsByFieldOfficerId = async (req, res) => {
     //   })
     // );
 
-    // res.json(result);
-
-    res
+    res.json(lands);
   } catch (error) {
     console.error("Error fetching lands by field officer:", error);
     res.status(500).json({ error: "Failed to fetch lands progress" });
