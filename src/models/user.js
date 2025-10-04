@@ -5,7 +5,7 @@ const { Schema } = mongoose;
 
 const userSchema = new Schema(
   {
-    customId: { type: String, unique: true }, // <-- here
+    // customId: { type: String, unique: true }, // <-- here
     role: { type: Schema.Types.ObjectId, ref: "Role", required: true },
     division: { type: Schema.Types.ObjectId, ref: "Division", default: null },
     designation: { type: String, default: null },
@@ -18,15 +18,14 @@ const userSchema = new Schema(
     bank: { type: String, default: null },
     branch: { type: String, default: null },
     contactNo: String,
-    password: { type: String, required: true, select: false },
+    password: { type: String, select: false },
     resetPasswordToken: String,
     resetPasswordExpires: Date,
     createdBy: { type: Schema.Types.ObjectId, ref: "User", default: null },
-    updatedBy: { type: Schema.Types.ObjectId, ref: "User", default: null },
     updateHistory: [
       {
         updatedAt: Date,
-        updatedBy: { type: Schema.Types.ObjectId, ref: "User" },
+        updatedBy: { type: Schema.Types.ObjectId, ref: "User", default: null },
         changes: String,
       },
     ],
@@ -41,17 +40,17 @@ userSchema.pre("save", async function (next) {
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
   }
-
-  // Generate customId
-  if (this.isNew) {
-    const prefix = this.designation?.toLowerCase() === "farmer" ? "F" : "U";
-    const count = await mongoose.model("User").countDocuments({
-      customId: new RegExp(`^${prefix}`),
-    });
-    this.customId = `${prefix}${(count + 1).toString().padStart(4, "0")}`;
-  }
-
+  
   next();
+  // Generate customId
+//   if (this.isNew) {
+//     const prefix = this.designation?.toLowerCase() === "farmer" ? "F" : "U";
+//     const count = await mongoose.model("User").countDocuments({
+//       customId: new RegExp(`^${prefix}`),
+//     });
+//     this.customId = `${prefix}${(count + 1).toString().padStart(4, "0")}`;
+//   }
+
 });
 
 export default mongoose.model("User", userSchema, "user");

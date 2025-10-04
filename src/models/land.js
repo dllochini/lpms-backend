@@ -12,7 +12,7 @@ const landSchema = new Schema(
     images: [{ type: Schema.Types.Mixed }], // could be array of file refs/URLs or objects
     documents: [{ type: Schema.Types.Mixed }], // same as images
     signedAgreement: { type: Schema.Types.Mixed }, // boolean, file ref, or object
-    createdBy: { type: Schema.Types.ObjectId, ref: "User" },
+    createdBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
     updatedBy: { type: Schema.Types.ObjectId, ref: "User" },
     notes: { type: String },
     updatedHistory: [

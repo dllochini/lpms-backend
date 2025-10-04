@@ -15,7 +15,7 @@ const signToken = (user) => {
 
 export const login = async (req, res) => {
   try {
-    // console.log(req.body);
+    console.log("in login controller",req.body);
     const { email, password } = req.body;
     const user = await loginUser(email, password); // returns user object without password
 
@@ -55,8 +55,8 @@ export const forgotPassword = async (req, res) => {
 //reset password
 export const resetPasswordController = async (req, res) => {
   try {
-    // console.log(req.body); //
-    const { token, password } = req.body;
+    console.log(req.body); //
+    const { token, password, identifier, loggedUserId } = req.body;
 
     if (!token) {
       return res.status(400).json({ error: "Reset token is required" });
@@ -65,7 +65,7 @@ export const resetPasswordController = async (req, res) => {
       return res.status(400).json({ error: "Password is required" });
     }
 
-    const result = await resetPassword(token, password);
+    const result = await resetPassword(token, password, identifier, loggedUserId);
     res.status(200).json(result);
   } catch (error) {
     // Prefer returning the error message (but avoid leaking internal details)
