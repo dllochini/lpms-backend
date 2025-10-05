@@ -7,6 +7,7 @@ const userSchema = new Schema(
   {
     role: { type: Schema.Types.ObjectId, ref: "Role", required: true },
     designation: { type: String, default: null },
+    division: { type: Schema.Types.ObjectId, ref: "Division", required: true },
     fullName: String,
     nic: String,
     passportNo: { type: Number, default: null },
