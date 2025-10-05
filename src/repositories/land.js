@@ -9,7 +9,8 @@ export const getAllLands = async () => {
 };
 
 export const getLand = async (landId) => {
-  const land = await Land.findById(landId);
+  console.log("Fetching land with ID:", landId);
+  const land = await Land.findById(landId).populate("farmer").populate("unit").populate("division");
   return land;
 };
 

@@ -4,7 +4,7 @@ import {
   deleteLand,
   updateLand,
   getLand,
-  getLandsByFieldOfficer
+  getLandsByFieldOfficer,
 } from "../repositories/land.js";
 
 // Get all lands
@@ -22,6 +22,7 @@ export const getLands = async (req, res) => {
 // Get land by ID
 export const getLandById = async (req, res) => {
   const landId = req.params.id;
+
   try {
     const land = await getLand(landId);
     if (!land) {
@@ -100,10 +101,9 @@ export const deleteLandById = async (req, res) => {
 
 export const getLandsByFieldOfficerId = async (req, res) => {
   try {
-
     console.log("in controller");
 
-    const  {fieldOfficerId} = req.params;
+    const { fieldOfficerId } = req.params;
 
     // 1️⃣ Get lands created by this officer
     const lands = await getLandsByFieldOfficer(fieldOfficerId);
