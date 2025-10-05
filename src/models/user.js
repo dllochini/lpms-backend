@@ -1,89 +1,54 @@
 import mongoose from "mongoose";
-const { Schema } = mongoose;
 import bcrypt from "bcrypt";
 
-const userSchema = new Schema({
-  // _id:String,
-  role: {
-    type: Schema.Types.ObjectId,
-    ref: "Role",
-    required: true,
-  },
-  division: {
-    type: Schema.Types.ObjectId,
-    ref: "Division",
-    required: false,
-    default: null,
-  },
-  // firstName: String,
-  // lastName: String,
-  fullName: String,
-  nic: String,
-  email: String,
-  contact_no: String,
-  customId: { type: String, unique: true }, // <-- here
-  password: { type: String, required: true, select: false },
-  resetPasswordToken: String,
-  resetPasswordExpires: Date,
+const { Schema } = mongoose;
 
-  created_at: {
-    type: Date,
-    required: true,
-    default: Date.now,
+const userSchema = new Schema(
+  {
+    role: { type: Schema.Types.ObjectId, ref: "Role", required: true },
+    designation: { type: String, default: null },
+    division: { type: Schema.Types.ObjectId, ref: "Division", required: true },
+    fullName: String,
+    nic: String,
+    passportNo: { type: Number, default: null },
+    email: String,
+    address: { type: String, default: null },
+    accountNo: { type: Number, default: null },
+    bank: { type: String, default: null },
+    branch: { type: String, default: null },
+    contactNo: String,
+    password: { type: String, select: false },
+    resetPasswordToken: String,
+    resetPasswordExpires: Date,
+    createdBy: { type: Schema.Types.ObjectId, ref: "User", default: null },
+    updateHistory: [
+      {
+        updatedAt: Date,
+        updatedBy: { type: Schema.Types.ObjectId, ref: "User", default: null },
+        changes: String,
+      },
+    ],
   },
-  created_by: {
-    type: Schema.Types.ObjectId,
-    ref: "User",
-    default: null,
-  },
-  address: {
-    type: String,
-    default: null,
-  },
-  bank: {
-    type: String,
-    default: null,
-  },
-  branch: {
-    type: String,
-    default: null,
-  },
-  account_Number: {
-    type: Number,
-    default: null,
-  },
-  passport_number: {
-    type: Number,
-    default: null,
-  },
-   updated_by: {
-    type: Schema.Types.ObjectId,
-    ref: "User",
-    default: null,
-  },
-  designation: {
-    type: String,
-    default: null,
-  },
-});
+  { timestamps: true }
+);
 
+// Pre-save hook
 userSchema.pre("save", async function (next) {
-  if (this.isModified("password")) {
+  // Hash password only if provided
+  if (this.isModified("password") && this.password) {
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
   }
 
-  if (this.isNew) {
-    const prefix = this.designation?.toLowerCase() === "farmer" ? "F" : "U";
-    const count = await mongoose.model("User").countDocuments({
-      customId: new RegExp(`^${prefix}`),
-    });
-    this.customId = `${prefix}${count + 1}`.padStart(5, "0");
-  }
-
   next();
+  // Generate customId
+  //   if (this.isNew) {
+  //     const prefix = this.designation?.toLowerCase() === "farmer" ? "F" : "U";
+  //     const count = await mongoose.model("User").countDocuments({
+  //       customId: new RegExp(`^${prefix}`),
+  //     });
+  //     this.customId = `${prefix}${(count + 1).toString().padStart(4, "0")}`;
+  //   }
 });
 
 export default mongoose.model("User", userSchema, "user");
-
-    

@@ -3,62 +3,33 @@ const { Schema } = mongoose;
 
 const taskSchema = new Schema(
   {
-    assignedTo: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
-    processID: {
-      type: Schema.Types.ObjectId,
-      ref: "Process",
-      required: true,
-    },
-    operation: {
-      type: Schema.Types.ObjectId,
-      ref: "Operation",
-      required: true,
-    },
-    start_date: {
-      type: Date,
-      required: true,
-    },
-    expected_end_date: {
-      type: Date,
-      required: true,
-    },
-    end_date: {
-      type: Date,
-    },
-    status: {
-      type: String,
-      required: true,
-      maxlength: 500,
-      trim: true,
-    },
-    created_at: {
-      type: Date,
-      default: Date.now,
-    },
-    created_by: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-    },
-    updated_at: {
-      type: Date,
-    },
-    updated_by: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-    },
-    update_history: [
+    // _id: { type: String, unique: true },
+    assignedTo: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    process: { type: Schema.Types.ObjectId, ref: "Process", required: true },
+    operation: { type: Schema.Types.ObjectId, ref: "Operation", required: true },
+    startDate: { type: Date, required: true },
+    expectedEndDate: { type: Date, required: true },
+    endDate: { type: Date },
+    status: { type: String, required: true, enum: ["Pending", "In Progress", "Completed", "Sent for approval"], default: "Pending" },
+    createdBy: { type: Schema.Types.ObjectId, ref: "User" },
+    updatedBy: { type: Schema.Types.ObjectId, ref: "User" },
+    updateHistory: [
       {
-        updated_at: Date,
-        updated_by: { type: Schema.Types.ObjectId, ref: "User" },
+        updatedAt: Date,
+        updatedBy: { type: Schema.Types.ObjectId, ref: "User" },
         changes: String,
       },
     ],
   },
-  { versionKey: false }
+  { timestamps: true }
 );
+
+// taskSchema.pre("save", async function (next) {
+//   if (this.isNew) {
+//     const count = await mongoose.model("Task").countDocuments();
+//     this._id = `TASK${(count + 1).toString().padStart(5, "0")}`;
+//   }
+//   next();
+// });
 
 export default mongoose.model("Task", taskSchema, "task");

@@ -3,41 +3,34 @@ const { Schema } = mongoose;
 
 const billSchema = new Schema(
   {
-    //billID:
-    process: {
-      type: Schema.Types.ObjectId,
-      ref: "Process",
-      required: true,
-    },
-    total_amount: {
-      type: String, // or Number if you prefer
-    },
-    tasksub_total: [
+    // _id: { type: String, unique: true },
+    process: { type: Schema.Types.ObjectId, ref: "Process", required: true },
+    totalAmount: { type: String },
+    taskSubTotal: [
       {
         type: Schema.Types.ObjectId,
         ref: "Task",
       },
     ],
-    workdonesub_total: [
+    workdoneSubTotal: [
       {
         type: Schema.Types.ObjectId,
         ref: "WorkDone",
       },
     ],
-    
-    notes: {
-      type: String,
-    },
-    created_at: {
-      type: Date,
-      default: Date.now,
-    },
-    updated_at: {
-      type: Date,
-      default: Date.now,
-    },
+    notes: { type: String },
+    status: { type: String, enum: ["Sent for Manager Approval", "Sent for Higher Manager Approval", "Approved"], default: "Sent for Manager Approval" },
   },
-  
+  { timestamps: true }
 );
 
-export default mongoose.model("Bill", billSchema,"bill");
+// billSchema.pre("save", async function (next) {
+//   if (this.isNew) {
+//     const count = await mongoose.model("Bill").countDocuments();
+//     this._id = `BILL${(count + 1).toString().padStart(5, "0")}`;
+//   }
+//   next();
+// });
+
+
+export default mongoose.model("Bill", billSchema, "bill");
