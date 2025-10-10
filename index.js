@@ -15,6 +15,9 @@ import divisionRouter from "./src/routes/divison.js";
 import fieldOfficerDashboardRouter from "./src/routes/fieldOfficerDashboard.js";
 import { protect } from "./middleware/auth.js";
 import implementRouter from "./src/routes/implement.js";
+import higherManagerDashboardRouter from "./src/routes/higherManagerDashboard.js";
+
+
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -60,6 +63,7 @@ app.use("/api/workDone", workDoneRouter);
 app.use("/api/tasks", taskRouter);
 app.use("/api/implements", implementRouter);
 app.use("/api/fieldOfficer", fieldOfficerDashboardRouter);
+app.use("/api/higherManager", higherManagerDashboardRouter);
 
 // start server
 app.listen(port, () => {
