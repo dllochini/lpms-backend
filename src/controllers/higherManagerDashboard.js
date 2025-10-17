@@ -1,11 +1,10 @@
-// controllers/higherManagerDashboardController.js
 import { higherManagerDashboardRepository } from "../repositories/higherManagerDashboard.js";
 
-export const getHigherManagerDashboard = async (req, res) => {
+export const getDivisionDashboard = async (req, res) => {
   try {
-    const { higherManagerId } = req.params;
-    if (!higherManagerId)
-      return res.status(400).json({ message: "HigherManager ID is required" });
+    const { divisionId } = req.params;
+    if (!divisionId)
+      return res.status(400).json({ message: "Division ID is required" });
 
     // Fetch all stats in parallel
     const [
@@ -16,12 +15,12 @@ export const getHigherManagerDashboard = async (req, res) => {
       graphData,
       coverageData
     ] = await Promise.all([
-      higherManagerDashboardRepository.countTotalLands(higherManagerId),
-      higherManagerDashboardRepository.calculateTotalArea(higherManagerId),
-      higherManagerDashboardRepository.countDivisions(higherManagerId),
-      higherManagerDashboardRepository.countLandsInProgress(higherManagerId),
-      higherManagerDashboardRepository.getGraphData(higherManagerId),
-      higherManagerDashboardRepository.getCoverageData(higherManagerId),
+      higherManagerDashboardRepository.countTotalLands(divisionId),
+      higherManagerDashboardRepository.calculateTotalArea(divisionId),
+      higherManagerDashboardRepository.countDivisions(divisionId),
+      higherManagerDashboardRepository.countLandsInProgress(divisionId),
+      higherManagerDashboardRepository.getGraphData(divisionId),
+      higherManagerDashboardRepository.getCoverageData(divisionId),
     ]);
 
     // Structure response for frontend
@@ -37,13 +36,13 @@ export const getHigherManagerDashboard = async (req, res) => {
     });
 
   } catch (err) {
-    console.error("Error fetching higher manager dashboard:", err);
+    console.error("Error fetching division dashboard:", err);
     return res
       .status(500)
-      .json({ message: "Failed to fetch higher manager dashboard data" });
+      .json({ message: "Failed to fetch division dashboard data" });
   }
 };
 
 export default {
-  getHigherManagerDashboard,
+  getDivisionDashboard,
 };
