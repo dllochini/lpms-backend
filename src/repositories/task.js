@@ -10,7 +10,7 @@ export const createTask = async (taskData) => {
 // Get all Tasks
 export const getAllTasks = async () => {
   const tasks = await Task.find()
-    .populate("land")
+    .populate("process")
     .populate("operation");
   return tasks;
 };
@@ -18,7 +18,7 @@ export const getAllTasks = async () => {
 // Get a Task by ID
 export const getTaskById = async (id) => {
   const task = await Task.findById(id)
-    .populate("land")
+    .populate("process")
     .populate("operation");
   return task;
 };

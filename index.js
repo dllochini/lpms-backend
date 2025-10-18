@@ -1,6 +1,7 @@
 // app.js
 import express from "express";
 import cors from "cors";
+import 'dotenv/config'
 import mongodbConnection from "./src/configs/dbconfig.js";
 import LoginRouter from "./src/routes/auth.js";
 import userRouter from "./src/routes/user.js";
@@ -24,7 +25,7 @@ const allowedOrigins = [process.env.FRONTEND_URL];
 
 const corsOptions = {
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (allowedOrigins.includes(origin)) {
       // allow requests from tools/postman (no origin) and allowed origins
       callback(null, true);
     } else {
@@ -35,6 +36,9 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.use(express.json());
+
+//set the upload folder as static
+app.use('/uploads', express.static('./uploads'));
 
 // Connect DB
 const connectDb = async () => {
@@ -57,7 +61,7 @@ app.use("/api/divisions", divisionRouter);
 app.use("/api/unit", unitRouter);
 app.use("/api/operation", operationRouter);
 app.use("/api/resource", resourceRouter);
-app.use("/api/workDone", workDoneRouter);
+app.use("/api/workdone", workDoneRouter);
 app.use("/api/tasks", taskRouter);
 app.use("/api/implements", implementRouter);
 app.use("/api/managers", managerRouter);

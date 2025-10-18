@@ -32,4 +32,4 @@ const workDoneSchema = new Schema(
 //   next();
 // });
 
-export default mongoose.model("WorkDone", workDoneSchema, "workDone");
+export default mongoose.model("WorkDone", workDoneSchema, "workdone");
