@@ -19,12 +19,17 @@ const processSchema = new Schema(
   { timestamps: true }
 );
 
-// processSchema.pre("save", async function (next) {
-//   if (this.isNew) {
-//     const count = await mongoose.model("Process").countDocuments();
-//     this._id = `PROCESS${(count + 1).toString().padStart(5, "0")}`;
-//   }
-//   next();
-// });
+// after processSchema definition, before export
+processSchema.virtual("tasks", {
+  ref: "Task",           // model name
+  localField: "_id",
+  foreignField: "process",
+  justOne: false,
+});
 
+processSchema.set("toObject", { virtuals: true });
+processSchema.set("toJSON", { virtuals: true });
+
+// export remains the same
 export default mongoose.model("Process", processSchema, "process");
+

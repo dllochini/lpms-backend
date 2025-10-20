@@ -20,9 +20,9 @@ export const createResource = async (req, res) => {
 
 export const getAllResources = async (req, res) => {
   try {
-    console.log("In controller");
+    // console.log("In controller");
     const resources = await getResources();
-    console.log("response:", resources);
+    // console.log("response:", resources);
     res.status(200).json(resources);
   } catch (error) {
     console.error(error);

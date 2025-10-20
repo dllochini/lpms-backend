@@ -7,6 +7,10 @@ const taskSchema = new Schema(
     assignedTo: { type: Schema.Types.ObjectId, ref: "User", required: true },
     process: { type: Schema.Types.ObjectId, ref: "Process", required: true },
     operation: { type: Schema.Types.ObjectId, ref: "Operation", required: true },
+
+    resource: { type: Schema.Types.ObjectId, ref: "Resource", required: true },
+    estTotalWork: { type: String }, //new
+    
     startDate: { type: Date, required: true },
     expectedEndDate: { type: Date, required: true },
     endDate: { type: Date },
@@ -24,12 +28,19 @@ const taskSchema = new Schema(
   { timestamps: true }
 );
 
-// taskSchema.pre("save", async function (next) {
-//   if (this.isNew) {
-//     const count = await mongoose.model("Task").countDocuments();
-//     this._id = `TASK${(count + 1).toString().padStart(5, "0")}`;
-//   }
-//   next();
-// });
+// after taskSchema definition, before export
+taskSchema.virtual("workDones", {
+  ref: "WorkDone",
+  localField: "_id",
+  foreignField: "task",
+  justOne: false,
+});
+
+taskSchema.set("toObject", { virtuals: true });
+taskSchema.set("toJSON", { virtuals: true });
+
+// index to speed lookups
+taskSchema.index({ process: 1 });
 
 export default mongoose.model("Task", taskSchema, "task");
+

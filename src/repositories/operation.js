@@ -13,30 +13,32 @@ export const getOperationById = async (operationID) => {
 };
 
 // Create new operation
-export const createOperation = async (operationData) => {
+export const createNewOperation = async (operationData) => {
   const operation = new Operation(operationData);
   const newOperation = await operation.save();
   return newOperation;
 };
 
 // Update operation by ID
-export const updateOperation = async (operationID, updateData) => {
-  const updateOperation = await Operation.findByIdAndUpdate(operationID, updateData, { new: true });
+export const updateOperationById = async (operationID, updateData) => {
+  const updateOperation = await Operation.findByIdAndUpdate(
+    operationID,
+    updateData,
+    { new: true }
+  );
   return updateOperation;
 };
 
 // Delete operation by ID
-export const deleteOperation = async (operationID) => {
+export const deleteOperationById = async (operationID) => {
   const deleteOperation = await Operation.findByIdAndDelete(operationID);
   return deleteOperation;
 };
 
- export default
- {
-    getAllOperations,
-    getOperationById,
-    createOperation,
-    updateOperation,
-    deleteOperation,
-
+export default {
+  getAllOperations,
+  getOperationById,
+  createNewOperation,
+  updateOperationById,
+  deleteOperationById,
 };

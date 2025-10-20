@@ -1,4 +1,6 @@
+import mongoose from "mongoose";
 import Task from "../models/task.js"; // Adjust the path if needed
+
 
 // Create a new Task
 export const createTask = async (taskData) => {
@@ -24,10 +26,31 @@ export const getTaskById = async (id) => {
 };
 
 // Update a Task by ID
+// src/repositories/task.js
+
 export const updateTask = async (id, updateData) => {
-  const updateTask = await Task.findByIdAndUpdate(id, updateData, { new: true });
-  return updateTask;
+  // normalize id if caller accidentally passed { id: '...' }
+  const taskId = typeof id === "object" && id !== null && id.id ? id.id : id;
+
+  // basic validation
+  if (!taskId || !mongoose.Types.ObjectId.isValid(String(taskId))) {
+    throw new Error("Invalid task id");
+  }
+
+  const updated = await Task.findByIdAndUpdate(String(taskId), updateData, { new: true });
+  return updated;
 };
+
+
+export const updateTaskStatus = async (id, status) => {
+  const updateStatus = await Task.findByIdAndUpdate(
+    id,
+    { status },   // must be an object
+    { new: true } // return the updated document
+  );
+  return updateStatus;
+};
+
 
 // Delete a Task by ID
 export const deleteTask = async (id) => {

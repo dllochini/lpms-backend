@@ -1,7 +1,7 @@
 // app.js
 import express from "express";
 import cors from "cors";
-import 'dotenv/config'
+import "dotenv/config";
 import mongodbConnection from "./src/configs/dbconfig.js";
 import LoginRouter from "./src/routes/auth.js";
 import userRouter from "./src/routes/user.js";
@@ -15,6 +15,7 @@ import taskRouter from "./src/routes/task.js";
 import divisionRouter from "./src/routes/division.js";
 import implementRouter from "./src/routes/implement.js";
 import managerRouter from "./src/routes/managerDashboard.js";
+import processRouter from "./src/routes/process.js";
 
 import { protect } from "./middleware/auth.js";
 
@@ -38,7 +39,7 @@ app.use(cors(corsOptions));
 app.use(express.json());
 
 //set the upload folder as static
-app.use('/uploads', express.static('./uploads'));
+app.use("/uploads", express.static("./uploads"));
 
 // Connect DB
 const connectDb = async () => {
@@ -66,6 +67,7 @@ app.use("/api/tasks", taskRouter);
 app.use("/api/implements", implementRouter);
 app.use("/api/managers", managerRouter);
 app.use("/api/createUserLand", landRouter);
+app.use("/api/process", processRouter);
 
 // start server
 app.listen(port, () => {
