@@ -4,7 +4,7 @@ import { getHigherManagerDashboard } from "../controllers/higherManagerDashboard
 
 const router = express.Router();
 
-// Example route: GET dashboard for a specific higher manager
-router.get("/division/:divisionId/card", getHigherManagerDashboard);
+// GET dashboard for a specific division (handled by higherManager dashboard controller)
+router.get("/land/:landId/card", getHigherManagerDashboard);
 
 export default router;

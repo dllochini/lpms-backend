@@ -1,10 +1,11 @@
+// controllers/higherManagerDashboard.js
 import { higherManagerDashboardRepository } from "../repositories/higherManagerDashboard.js";
 
-export const getDivisionDashboard = async (req, res) => {
+export const getHigherManagerDashboard = async (req, res) => {
   try {
-    const { divisionId } = req.params;
-    if (!divisionId)
-      return res.status(400).json({ message: "Division ID is required" });
+    const { landId } = req.params;
+    if (!landId)
+      return res.status(400).json({ message: "Land ID is required" });
 
     // Fetch all stats in parallel
     const [
@@ -15,12 +16,12 @@ export const getDivisionDashboard = async (req, res) => {
       graphData,
       coverageData
     ] = await Promise.all([
-      higherManagerDashboardRepository.countTotalLands(divisionId),
-      higherManagerDashboardRepository.calculateTotalArea(divisionId),
-      higherManagerDashboardRepository.countDivisions(divisionId),
-      higherManagerDashboardRepository.countLandsInProgress(divisionId),
-      higherManagerDashboardRepository.getGraphData(divisionId),
-      higherManagerDashboardRepository.getCoverageData(divisionId),
+      higherManagerDashboardRepository.countTotalLands(landId),
+      higherManagerDashboardRepository.calculateTotalArea(landId),
+      higherManagerDashboardRepository.countDivisions(landId),
+      higherManagerDashboardRepository.countLandsInProgress(landId),
+      higherManagerDashboardRepository.getGraphData(landId),
+      higherManagerDashboardRepository.getCoverageData(landId),
     ]);
 
     // Structure response for frontend
@@ -41,8 +42,4 @@ export const getDivisionDashboard = async (req, res) => {
       .status(500)
       .json({ message: "Failed to fetch division dashboard data" });
   }
-};
-
-export default {
-  getDivisionDashboard,
 };
