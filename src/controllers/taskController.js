@@ -34,6 +34,19 @@ export const getTaskById = async (req, res) => {
   }
 };
 
+export const getTaskByDiv = async (req, res) => {
+  try {
+    const {userId }  = req.params;
+    // console.log("id user in controller",userId);
+    const task = await taskRepo.getAllTasksByDiv(userId);
+    if (!task) return res.status(404).json({ message: "Task not found" });
+    res.status(200).json(task);
+  } catch (error) {
+    console.error("Error fetching task:", error);
+    res.status(500).json({ message: "Failed to fetch task", error });
+  }
+};
+
 export const updateTask = async (req, res) => {
   try {
     const id = req.params;
