@@ -3,6 +3,7 @@ import * as workDoneRepo from "../repositories/workDone.js";
 // Create WorkDone
 export const createWorkDone = async (req, res) => {
   try {
+    console.log("in create controller")
     const result = await workDoneRepo.createWorkDone(req.body);
     res.status(201).json(result);
   } catch (err) {
