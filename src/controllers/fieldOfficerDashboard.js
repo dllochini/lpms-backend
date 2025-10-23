@@ -3,11 +3,11 @@ import { fieldOfficerDashboardRepository } from "../repositories/fieldOfficerDas
 
 export const getFieldOfficerDashboard = async (req, res) => {
   try {
-    const { landId } = req.params;
-    if (!landId)
-      return res.status(400).json({ message: "Officer ID is required" });
+    const { divisionId } = req.params;
+    if (!divisionId)
+      return res.status(400).json({ message: "Division ID is required" });
 
-    // Fetch all data in parallel
+    // Fetch all data in parallel (replace landId with divisionId)
     const [
       totalLandsAssigned,
       totalFarmers,
@@ -15,11 +15,11 @@ export const getFieldOfficerDashboard = async (req, res) => {
       recentOperations,
       recentPayments
     ] = await Promise.all([
-      fieldOfficerDashboardRepository.countAssignedLands(landId),
-      fieldOfficerDashboardRepository.countFarmers(landId),
-      fieldOfficerDashboardRepository.countLandsInProgress(landId),
-      fieldOfficerDashboardRepository.getRecentOperations(landId),
-      fieldOfficerDashboardRepository.getRecentPayments(landId)
+      fieldOfficerDashboardRepository.countAssignedLandsByDivision(divisionId),
+      fieldOfficerDashboardRepository.countFarmersByDivision(divisionId),
+      fieldOfficerDashboardRepository.countLandsInProgressByDivision(divisionId),
+      fieldOfficerDashboardRepository.getRecentOperationsByDivision(divisionId),
+      fieldOfficerDashboardRepository.getRecentPaymentsByDivision(divisionId)
     ]);
 
     return res.json({
