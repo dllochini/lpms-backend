@@ -7,13 +7,13 @@ export const addNewResource = async (data) => {
 };
 
 export const getResources = async () => {
-  const resources = await Resource.find().populate("unit", "name");
-  console.log("In repo:", resources);
+  const resources = await Resource.find().populate("unit");
+  // console.log("In repo:", resources);
   return resources;
 };
 
 export const getResource = async (id) => {
-  const resource = await Resource.findById(id).populate("unit", "name");
+  const resource = await Resource.findById(id).populate("unit");
   return resource;
 };
 

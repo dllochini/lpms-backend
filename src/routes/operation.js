@@ -1,12 +1,12 @@
 import express from "express";
-import * as operationController from "../controllers/operationController.js";
+import {getOperations, getOperation, createOperation, updateOperation, deleteOperation} from "../controllers/operationController.js";
 
 const router = express.Router();
 
-router.get("/", operationController.getOperations);
-router.get("/:id", operationController.getOperation);
-router.post("/", operationController.createOperation);
-router.put("/:id", operationController.updateOperation);
-router.delete("/:id", operationController.deleteOperation);
+router.get("/", getOperations);
+router.get("/:id",getOperation);
+router.post("/",createOperation);
+router.put("/:id",updateOperation);
+router.delete("/:id",deleteOperation);
 
 export default router;

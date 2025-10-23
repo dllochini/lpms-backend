@@ -26,4 +26,4 @@ const resourceSchema = new Schema(
 //   next();
 // });
 
-export default mongoose.model("Resource", resourceSchema, "resource");
+export default mongoose.model("Resource", resourceSchema, "resources");
