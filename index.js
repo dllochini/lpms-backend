@@ -16,6 +16,7 @@ import fieldOfficerDashboardRouter from "./src/routes/fieldOfficerDashboard.js";
 import { protect } from "./middleware/auth.js";
 import implementRouter from "./src/routes/implement.js";
 import higherManagerDashboardRouter from "./src/routes/higherManagerDashboard.js";
+import managerDashboardRouter from "./src/routes/managerDashboard.js";
 
 
 
@@ -64,6 +65,7 @@ app.use("/api/tasks", taskRouter);
 app.use("/api/implements", implementRouter);
 app.use("/api/fieldOfficer", fieldOfficerDashboardRouter);
 app.use("/api/higherManager", higherManagerDashboardRouter);
+app.use("/api/manager", managerDashboardRouter);
 
 // start server
 app.listen(port, () => {
