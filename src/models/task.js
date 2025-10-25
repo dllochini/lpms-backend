@@ -17,6 +17,10 @@ const taskSchema = new Schema(
     status: { type: String, required: true, enum: ["Pending", "In Progress", "Completed", "Sent for approval"], default: "Pending" },
     createdBy: { type: Schema.Types.ObjectId, ref: "User" },
     updatedBy: { type: Schema.Types.ObjectId, ref: "User" },
+
+    approvalNote: { type: String },
+    issueNote: { type: String },
+    
     updateHistory: [
       {
         updatedAt: Date,

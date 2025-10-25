@@ -5,6 +5,7 @@ import {
   updateLandById,
   deleteLandById,
   getLandsByFieldOfficerId,
+  getLandsByDivisionId,
 } from "../controllers/landController.js";
 import { createUserAndLand } from "../controllers/createUserAndLandController.js";
 import { uploadFields } from "../../utils/upload.js";
@@ -26,5 +27,7 @@ router.put("/:id", updateLandById);
 router.delete("/:landId", deleteLandById);
 
 router.get("/fieldOfficer/:fieldOfficerId", getLandsByFieldOfficerId);
+
+router.get("/manager/:managerId", getLandsByDivisionId);
 
 export default router;

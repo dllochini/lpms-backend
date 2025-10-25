@@ -36,7 +36,7 @@ export const getTaskById = async (req, res) => {
 
 export const getTaskByDiv = async (req, res) => {
   try {
-    const {userId }  = req.params;
+    const { userId }  = req.params;
     // console.log("id user in controller",userId);
     const task = await taskRepo.getAllTasksByDiv(userId);
     if (!task) return res.status(404).json({ message: "Task not found" });
