@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import Task from "../models/task.js"; // Adjust the path if needed
 import User from "../models/user.js";
-import Land from "../models/land.js";
 import WorkDone from "../models/workDone.js"
 
 // Create a new Task
@@ -111,17 +110,6 @@ export const updateTask = async (id, updateData) => {
   const updated = await Task.findByIdAndUpdate(String(taskId), updateData, { new: true });
   return updated;
 };
-
-
-export const updateTaskStatus = async (id, status) => {
-  const updateStatus = await Task.findByIdAndUpdate(
-    id,
-    { status },   // must be an object
-    { new: true } // return the updated document
-  );
-  return updateStatus;
-};
-
 
 // Delete a Task by ID
 export const deleteTask = async (id) => {
