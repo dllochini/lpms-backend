@@ -1,139 +1,220 @@
-// repositories/managerDashboardRepository.js
 
+
+
+import mongoose from "mongoose";
 import Land from "../models/land.js";
 import User from "../models/user.js";
 import Task from "../models/task.js";
 import Process from "../models/process.js";
-import Bill from "../models/bill.js"; // rename if your payments model is different
+import Bill from "../models/bill.js";
 import Role from "../models/role.js";
 
-/**
- * Manager dashboard repository
- * - Returns counts and recent lists for a given division
- * - Mirrors style of fieldOfficer repository (small focused functions)
- */
+// Convert to ObjectId safely
+function toObjectIdMaybe(id) {
+  if (!id) return null;
+  if (id instanceof mongoose.Types.ObjectId) return id;
+  return mongoose.Types.ObjectId.isValid(id) ? new mongoose.Types.ObjectId(id) : null;
+}
 
+// Get all land IDs for a division
+async function getLandIdsForDivision(divisionId) {
+  const maybeId = toObjectIdMaybe(divisionId);
+  if (!maybeId) return [];
+
+  const landIds = await Land.find({
+    $or: [{ division: maybeId }, { "division._id": maybeId }],
+  }).distinct("_id");
+
+  console.log("DEBUG: getLandIdsForDivision ->", { divisionId, landCount: landIds.length });
+  return landIds;
+}
+
+// Get all process IDs for a division (via land or division)
+async function getProcessIdsForDivision(divisionId, landIds = []) {
+  const maybeId = toObjectIdMaybe(divisionId);
+
+  const orConditions = [
+    { division: maybeId },
+    { "division._id": maybeId },
+    ...(landIds.length > 0 ? [{ land: { $in: landIds } }] : []),
+  ];
+
+  const processIds = await Process.find({ $or: orConditions }).distinct("_id");
+  console.log("DEBUG: getProcessIdsForDivision ->", { divisionId, processCount: processIds.length });
+  return processIds;
+}
+
+// Manager Dashboard Repository
 export const managerDashboardRepository = {
-  // Total lands in this division
   async countTotalLandsByDivision(divisionId) {
-    const count = await Land.countDocuments({ division: divisionId });
+    const maybeId = toObjectIdMaybe(divisionId);
+    if (!maybeId) return 0;
+
+    const count = await Land.countDocuments({
+      $or: [{ division: maybeId }, { "division._id": maybeId }],
+    });
     console.log("Total lands (division):", count);
     return count;
   },
 
-  // Total field officers assigned to this division
   async countFieldOfficersByDivision(divisionId) {
-    // If users store division reference directly:
-    // try to resolve Role ObjectId for "FieldOfficer" if roles are referenced
-    const fieldOfficerRole = await Role.findOne({ name: "FieldOfficer" });
+    const maybeId = toObjectIdMaybe(divisionId);
+    if (!maybeId) return 0;
 
-    let filter = {};
-    if (fieldOfficerRole) {
-      filter = { role: fieldOfficerRole._id, "division._id": divisionId };
-      // also try alternative shapes
-      const count = await User.countDocuments(filter);
-      console.log("Field officers count (division):", count);
-      return count;
-    }
+    const role = await Role.findOne({ name: "Field Officer" });
+    if (!role) return 0;
 
-    // fallback if role is stored as embedded object { name: 'FieldOfficer' }
-    const countFallback = await User.countDocuments({ "role.name": "FieldOfficer", "division._id": divisionId });
-    console.log("Field officers count (division) fallback:", countFallback);
-    return countFallback;
+    const count = await User.countDocuments({
+      role: role._id,
+      $or: [{ division: maybeId }, { "division._id": maybeId }],
+    });
+    console.log("Field officers count (division):", count);
+    return count;
   },
 
-  // Pending operations count (tasks with status 'pending' in this division)
   async countPendingOperationsByDivision(divisionId) {
-    // If Task stores division directly
-    let count = await Task.countDocuments({ division: divisionId, status: "pending" });
+    const maybeId = toObjectIdMaybe(divisionId);
+    if (!maybeId) return 0;
 
-    // Fallback: Task -> Process -> Land -> Division chain
-    if (typeof count === "number" && count === 0) {
-      const landIds = await Land.find({ division: divisionId }).distinct("_id");
-      if (landIds.length > 0) {
-        const processIds = await Process.find({ landID: { $in: landIds } }).distinct("_id");
-        count = await Task.countDocuments({ processID: { $in: processIds }, status: "pending" });
-      }
-    }
+    const landIds = await getLandIdsForDivision(divisionId);
+    const processIds = await getProcessIdsForDivision(divisionId, landIds);
+
+    let count = await Task.countDocuments({
+      $or: [
+        { division: maybeId },
+        { "division._id": maybeId },
+        ...(processIds.length > 0 ? [{ process: { $in: processIds } }] : []),
+      ],
+      status: "In Progress",
+    });
 
     console.log("Pending operations (division):", count);
     return count;
   },
 
-  // Pending bills/payments count in this division
+  // ✅ Updated pending payments
   async countPendingBillsByDivision(divisionId) {
-    // try Bill having division embedded
-    let count = await Bill.countDocuments({ "division._id": divisionId, status: "pending" });
+    const maybeId = toObjectIdMaybe(divisionId);
+    if (!maybeId) return 0;
 
-    // fallback: bills associated with land -> division
-    if (typeof count === "number" && count === 0) {
-      const landIds = await Land.find({ division: divisionId }).distinct("_id");
-      if (landIds.length > 0) {
-        count = await Bill.countDocuments({ land: { $in: landIds }, status: "pending" });
-      }
-    }
+    const landIds = await getLandIdsForDivision(divisionId);
+    const processIds = await getProcessIdsForDivision(divisionId, landIds);
 
-    console.log("Pending bills (division):", count);
-    return count;
+    const query = {
+      status: "pending",
+      $or: [
+        { division: maybeId },
+        { "division._id": maybeId },
+        ...(landIds.length > 0 ? [{ land: { $in: landIds } }] : []),
+        ...(processIds.length > 0
+          ? [
+              { process: { $in: processIds } },
+              { processId: { $in: processIds } },
+              { process_id: { $in: processIds } },
+            ]
+          : []),
+      ],
+    };
+
+    const billIds = await Bill.distinct("_id", query);
+    console.log("DEBUG: countPendingBillsByDivision ->", {
+      divisionId,
+      landIdsCount: landIds.length,
+      processIdsCount: processIds.length,
+      billIdsCount: billIds.length,
+    });
+
+    return billIds.length;
   },
 
-  // Recent task requests for this division (populated)
-  async getRecentRequestsByDivision(divisionId, limit = 6) {
-    // simple path: Task has division
-    let tasks = await Task.find({ division: divisionId })
-      .sort({ createdAt: -1 })
-      .limit(limit)
-      .populate({ path: "assignedTo", select: "_id fullName name" })
-      .populate({
-        path: "processID",
-        populate: [{ path: "landID", select: "_id title" }, { path: "landId", select: "_id title" }],
-      })
-      .lean();
-
-    // fallback: Task -> Process -> Land -> Division
-    if (!tasks || tasks.length === 0) {
-      const landIds = await Land.find({ division: divisionId }).distinct("_id");
-      if (landIds.length > 0) {
-        const processIds = await Process.find({ landID: { $in: landIds } }).distinct("_id");
-        tasks = await Task.find({ processID: { $in: processIds } })
-          .sort({ createdAt: -1 })
-          .limit(limit)
-          .populate({ path: "assignedTo", select: "_id fullName name" })
-          .populate({
-            path: "processID",
-            populate: [{ path: "landID", select: "_id title" }, { path: "landId", select: "_id title" }],
-          })
-          .lean();
-      }
-    }
-
-    return tasks || [];
+  async  getRecentRequestsByDivision(divisionId, limit = 6) {
+    const maybeId = mongoose.Types.ObjectId.isValid(divisionId)
+      ? new mongoose.Types.ObjectId(divisionId)
+      : null;
+    if (!maybeId) return [];
+  
+    const tasks = await Task.aggregate([
+      { $match: { status: "Send for Approval" } },
+      {
+        $lookup: {
+          from: "processes",
+          localField: "process",
+          foreignField: "_id",
+          as: "process",
+        },
+      },
+      { $unwind: "$process" },
+      {
+        $lookup: {
+          from: "lands",
+          localField: "process.land",
+          foreignField: "_id",
+          as: "land",
+        },
+      },
+      { $unwind: "$land" },
+      { $match: { "land.division": maybeId } },
+      {
+        $lookup: {
+          from: "users",
+          localField: "assignedTo",
+          foreignField: "_id",
+          as: "assignedTo",
+        },
+      },
+      { $unwind: "$assignedTo" },
+      { $sort: { createdAt: -1 } },
+      { $limit: limit },
+      {
+        $project: {
+          _id: 1,
+          status: 1,
+          createdAt: 1,
+          assignedTo: { _id: 1, fullName: 1, name: 1 },
+          process: 1,
+        },
+      },
+    ]);
+  
+    return tasks;
   },
+  
+  
 
-  // Recent payments (Bills) in this division
+ 
+  
+  // Get recent payments by division with payer populated
   async getRecentPaymentsByDivision(divisionId, limit = 6) {
-    let payments = await Bill.find({ "division._id": divisionId })
-      .sort({ createdAt: -1 })
+    const maybeId = toObjectIdMaybe(divisionId);
+    if (!maybeId) return [];
+  
+    const landIds = await getLandIdsForDivision(divisionId);
+    const processIds = await getProcessIdsForDivision(divisionId, landIds);
+  
+    const orConditions = [
+      { division: maybeId },
+      { "division._id": maybeId },
+      ...(landIds.length > 0 ? [{ land: { $in: landIds } }] : []),
+      ...(processIds.length > 0
+        ? [
+            { process: { $in: processIds } },
+            { processId: { $in: processIds } },
+            { process_id: { $in: processIds } },
+          ]
+        : []),
+    ];
+  
+    const payments = await Bill.find({ $or: orConditions, status: "pending" })
+      .sort({ created_at: -1 })
       .limit(limit)
-      .populate({ path: "payer", select: "_id fullName name" })
+      .populate({ path: "payer", select: "_id fullName name" }) // ✅ populate payer
       .lean();
-
-    // fallback: bills by land
-    if (!payments || payments.length === 0) {
-      const landIds = await Land.find({ division: divisionId }).distinct("_id");
-      if (landIds.length > 0) {
-        payments = await Bill.find({ land: { $in: landIds } })
-          .sort({ createdAt: -1 })
-          .limit(limit)
-          .populate({ path: "payer", select: "_id fullName name" })
-          .lean();
-      }
-    }
-
-    return payments || [];
+      console.log("DEBUG payments:", payments);
+      
+    return payments;
+  
   },
 
-  // Combined overview + recent data (main entry used by controller)
   async getOverviewAndRecent(divisionId, options = { recentLimit: 6 }) {
     const { recentLimit } = options;
 
@@ -156,8 +237,4 @@ export const managerDashboardRepository = {
       recentPayments,
     };
   },
-};
-
-export default {
-  managerDashboardRepository,
 };

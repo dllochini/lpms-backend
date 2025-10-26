@@ -4,11 +4,12 @@ const { Schema } = mongoose;
 const billSchema = new Schema(
   {
     //billID: 
-    process: {
+    processID: {
       type: Schema.Types.ObjectId,
       ref: "Process",
       required: true,
     },
+    payer: { type: Schema.Types.ObjectId, ref: "User" }, 
     total_amount: {
       type: String, // or Number if you prefer
     },

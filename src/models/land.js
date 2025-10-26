@@ -4,8 +4,8 @@ const { Schema } = mongoose;
 const landSchema = new Schema(
   {
     user: { type: Schema.Types.ObjectId, ref: "User", required: true },
-
     
+    farmer: { type: Schema.Types.ObjectId, ref: "User" },
     unit: { type: Schema.Types.ObjectId, ref: "Unit" },
     size: { type: Number, required: true },
     location: { type: String },
