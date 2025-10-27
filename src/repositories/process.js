@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Process from "../models/process.js";
 import Task from "../models/task.js";
 import WorkDone from "../models/workDone.js";
@@ -17,7 +18,7 @@ export const getProcessByLandId = async (landId) => {
       .populate("operation")
       .populate({
         path: "resource",
-        populate: { path: "unit" },
+        populate: { path: "unit" }, 
       })
       .lean();
 
@@ -57,6 +58,35 @@ export const getProcessByLandId = async (landId) => {
   }
 };
 
+export const updateProcess = async (id, updateData) => {
+  // normalize id if caller accidentally passed { id: '...' }
+  const processId = typeof id === "object" && id !== null && id.id ? id.id : id;
+
+  // basic validation
+  if (!processId || !mongoose.Types.ObjectId.isValid(String(processId))) {
+    throw new Error("Invalid task id");
+  }
+
+  const updated = await Process.findByIdAndUpdate(String(processId), updateData, { new: true });
+  return updated;
+};
+
+export const createProcess = async (processData) => {
+  const process = new Process(processData);
+  const newprocess = await process.save();
+  return newprocess;
+};
+
+export const deleteProcess = async (id) => {
+  // console.log("delete repo")
+  const deleteProcess = await Process.findByIdAndDelete(id);
+  // console.log(deleteProcess,"ok")
+  return deleteProcess;
+};
+
+
 export default {
     getProcessByLandId,
+    updateProcess,
+    createProcess,
 }

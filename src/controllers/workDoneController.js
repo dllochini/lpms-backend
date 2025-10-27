@@ -3,7 +3,7 @@ import * as workDoneRepo from "../repositories/workDone.js";
 // Create WorkDone
 export const createWorkDone = async (req, res) => {
   try {
-    console.log("in create controller")
+    console.log("in create controller");
     const result = await workDoneRepo.createWorkDone(req.body);
     res.status(201).json(result);
   } catch (err) {
@@ -46,7 +46,8 @@ export const updateWorkDone = async (req, res) => {
 // Delete WorkDone by ID
 export const deleteWorkDone = async (req, res) => {
   try {
-    const result = await workDoneRepo.deleteWorkDone(req.params.id);
+    const { workId } = req.params;
+    const result = await workDoneRepo.deleteWorkDone(workId);
     if (!result) return res.status(404).json({ message: "Not found" });
     res.json({ message: "Deleted successfully" });
   } catch (err) {
