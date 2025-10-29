@@ -1,38 +1,50 @@
+// controllers/higherManagerDashboard.js
+import higherManagerDashboardRepository from "../repositories/higherManagerDashboard.js";
+
 export const getHigherManagerDashboard = async (req, res) => {
   try {
-    const { landId } = req.params;
-    const { managerId } = req.query;
+    const divisionId = req.query.divisionId || req.params.divisionId || null;
 
-    if (!landId && !managerId) {
-      return res.status(400).json({ message: "landId or managerId is required" });
+    // Detect if this route is "cards only"
+    const isCardsRoute = typeof req.originalUrl === "string" && req.originalUrl.includes("/cards");
+
+    if (isCardsRoute) {
+      // Only return card info for the division
+      const cardData = await higherManagerDashboardRepository.getHigherManagerDashboardCardInfo({ divisionId });
+      return res.json(cardData);
     }
 
-    const idToUse = { landId, managerId }; // pass as object
-
+    // Full dashboard for global or division-specific
     const [
-      totalLands,
-      totalArea,
-      totalDivisions,
-      landsInProgress,
-      graphData,
-      coverageData
+      overview,
+      graph,
+      coverage,
+      recentOperations,
+      recentPayments,
+      progress,
     ] = await Promise.all([
-      higherManagerDashboardRepository.countTotalLands(idToUse),
-      higherManagerDashboardRepository.calculateTotalArea(idToUse),
-      higherManagerDashboardRepository.countDivisions(idToUse),
-      higherManagerDashboardRepository.countLandsInProgress(idToUse),
-      higherManagerDashboardRepository.getGraphData(idToUse),
-      higherManagerDashboardRepository.getCoverageData(idToUse),
+      higherManagerDashboardRepository.getOverview({ divisionId }),
+      higherManagerDashboardRepository.getGraphData({ divisionId }),
+      higherManagerDashboardRepository.getCoverageData({ divisionId }),
+      higherManagerDashboardRepository.getRecentOperations({ divisionId }),
+      higherManagerDashboardRepository.getRecentPayments({ divisionId }),
+      higherManagerDashboardRepository.getProgress({ divisionId }),
     ]);
 
     return res.json({
-      overview: { totalLands, totalArea, divisions: totalDivisions, landsInProgress },
-      graph: graphData,
-      coverage: coverageData,
+      overview: overview || { totalLands: 0, totalArea: 0, divisions: 0, landsInProgress: 0 },
+      graph: graph || [],
+      coverage: coverage || [],
+      updates: [
+        ...(Array.isArray(recentOperations) ? recentOperations.map(op => ({ id: op._id, title: op.name, date: op.startDate || op.createdAt })) : []),
+        ...(Array.isArray(recentPayments) ? recentPayments.map(pay => ({ id: pay._id, title: `Payment - ${pay.amount}`, date: pay.createdAt })) : [])
+      ],
+      progress: progress || { pending: 0, inProgress: 0, completed: 0 }
     });
-
   } catch (err) {
     console.error("Error fetching higher manager dashboard:", err);
-    return res.status(500).json({ message: "Failed to fetch higher manager dashboard data" });
+    return res.status(500).json({ message: "Failed to fetch higher manager dashboard data", error: err.message });
   }
 };
+
+export default { getHigherManagerDashboard };

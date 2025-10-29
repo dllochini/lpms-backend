@@ -59,60 +59,45 @@ export const fieldOfficerDashboardRepository = {
 
   // Get overall task progress in this division
   async getOverallProgressByDivision(divisionId) {
-    // Step 1: Get assigned lands
-    const landIds = await Land.find({ division: divisionId, user: { $exists: true, $ne: null } }).distinct("_id");
-  
-    if (landIds.length === 0) return { pending: 0, inProgress: 0, completed: 0 };
-  
-    let pendingSum = 0;
-    let inProgressSum = 0;
-    let completedSum = 0;
-  
-    // Step 2: Loop over lands and calculate land-level task percentages
-    for (const landId of landIds) {
-      const processIds = await Process.find({ land: landId }).distinct("_id");
-      const totalTasks = await Task.countDocuments({ process: { $in: processIds } });
-  
-      if (totalTasks === 0) continue;
-  
-      const pendingTasks = await Task.countDocuments({
-        process: { $in: processIds },
-        status: { $regex: /^pending$/i }
-      });
-      const inProgressTasks = await Task.countDocuments({
-        process: { $in: processIds },
-        status: { $regex: /^In Progress$/i }
-      });
-      const completedTasks = await Task.countDocuments({
-        process: { $in: processIds },
-        status: { $regex: /^Approved$/i }
-      });
-  
-      pendingSum += (pendingTasks / totalTasks) * 100;
-      inProgressSum += (inProgressTasks / totalTasks) * 100;
-      completedSum += (completedTasks / totalTasks) * 100;
+    if (!mongoose.Types.ObjectId.isValid(divisionId)) {
+      return { pending: 0, inProgress: 0, completed: 0 };
     }
   
-    const landsCount = landIds.length;
+    // Step 1: Get all lands in the division
+    const landIds = await Land.find({ division: divisionId }).distinct("_id");
+    console.log("Land IDs:", landIds);
+    if (landIds.length === 0) return { pending: 0, inProgress: 0, completed: 0 };
   
-    // Step 3: Average across all lands
+    // Step 2: Get all processes for these lands
+    const processIds = await Process.find({ land: { $in: landIds } }).distinct("_id");
+    console.log("Process IDs:", processIds);
+    if (processIds.length === 0) return { pending: 0, inProgress: 0, completed: 0 };
+  
+    // Step 3: Count tasks by status
+    const totalTasks = await Task.countDocuments({ process: { $in: processIds } });
+    console.log("Total Tasks:", totalTasks);
+    if (totalTasks === 0) return { pending: 0, inProgress: 0, completed: 0 };
+  
+    const pendingTasks = await Task.countDocuments({ process: { $in: processIds }, status: "Pending" });
+    const inProgressTasks = await Task.countDocuments({ process: { $in: processIds }, status: "In Progress" });
+    const completedTasks = await Task.countDocuments({ process: { $in: processIds }, status: "Completed" });
+  
     return {
-      pending: Math.round(pendingSum / landsCount),
-      inProgress: Math.round(inProgressSum / landsCount),
-      completed: Math.round(completedSum / landsCount)
+      pending: Math.round((pendingTasks / totalTasks) * 100),
+      inProgress: Math.round((inProgressTasks / totalTasks) * 100),
+      completed: Math.round((completedTasks / totalTasks) * 100),
     };
   },
-  
-
   // Get recent operations in this division
   async getRecentOperationsByDivision(divisionId, limit = 5) {
     const landIds = await Land.find({ division: divisionId }).distinct("_id");
-    const processIds = await Process.find({ landID: { $in: landIds } }).distinct("_id");
-    const tasks = await Task.find({ processID: { $in: processIds } })
+    const processIds = await Process.find({ land: { $in: landIds } }).distinct("_id");
+  
+    const tasks = await Task.find({ process: { $in: processIds } })
       .sort({ createdAt: -1 })
       .limit(limit)
       .select("_id name startDate");
-
+  
     return tasks.map(task => ({
       id: task._id,
       title: task.name,

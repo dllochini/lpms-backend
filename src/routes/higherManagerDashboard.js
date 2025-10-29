@@ -1,14 +1,12 @@
-// routes/higherManager.js
 import express from "express";
 import { getHigherManagerDashboard } from "../controllers/higherManagerDashboard.js";
 
 const router = express.Router();
 
-// GET dashboard for a land OR manager
-// If the manager has no assigned land, call: /dashboard?managerId=<managerId>
+// Global dashboard or filtered by divisionId (optional query param)
 router.get("/dashboard", getHigherManagerDashboard);
 
-// Optional: keep the land-specific route for backward compatibility
-router.get("/land/:landId/card", getHigherManagerDashboard);
+// Dashboard cards for a specific division
+router.get("/division/:divisionId/cards", getHigherManagerDashboard);
 
 export default router;

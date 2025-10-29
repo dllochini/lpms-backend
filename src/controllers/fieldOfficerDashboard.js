@@ -13,7 +13,8 @@ export const getFieldOfficerDashboard = async (req, res) => {
       totalFarmers,
       landsInProgress,
       recentOperations,
-      recentPayments
+      recentPayments,
+      progress
     ] = await Promise.all([
       fieldOfficerDashboardRepository.countAssignedLandsByDivision(divisionId),
       fieldOfficerDashboardRepository.countFarmersByDivision(divisionId),
@@ -41,11 +42,7 @@ export const getFieldOfficerDashboard = async (req, res) => {
           time: pay.time,
         }))
       ],
-      progress: {
-        pending: totalLandsAssigned ? Math.round((totalLandsAssigned - landsInProgress) / totalLandsAssigned * 100) : 0,
-        inProgress: landsInProgress ? Math.round(landsInProgress / totalLandsAssigned * 100) : 0,
-        completed: 0, // Optional: add logic for completed lands
-      }
+      progress: progress || { pending: 0, inProgress: 0, completed: 0 }
     });
 
   } catch (err) {
