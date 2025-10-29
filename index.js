@@ -12,8 +12,14 @@ import operationRouter from "./src/routes/operation.js";
 import resourceRouter from "./src/routes/resource.js";
 import workDoneRouter from "./src/routes/workDone.js";
 import taskRouter from "./src/routes/task.js";
-import divisionRouter from "./src/routes/division.js";
+import divisionRouter from "./src/routes/divison.js";
+import fieldOfficerDashboardRouter from "./src/routes/fieldOfficerDashboard.js";
+import { protect } from "./middleware/auth.js";
 import implementRouter from "./src/routes/implement.js";
+import higherManagerDashboardRouter from "./src/routes/higherManagerDashboard.js";
+import managerDashboardRouter from "./src/routes/managerDashboard.js";
+
+
 import managerRouter from "./src/routes/managerDashboard.js";
 import processRouter from "./src/routes/process.js";
 
@@ -65,7 +71,9 @@ app.use("/api/resource", resourceRouter);
 app.use("/api/workdone", workDoneRouter);
 app.use("/api/tasks", taskRouter);
 app.use("/api/implements", implementRouter);
-app.use("/api/managers", managerRouter);
+app.use("/api/fieldOfficer", fieldOfficerDashboardRouter);
+app.use("/api/higherManager", higherManagerDashboardRouter);
+app.use("/api/manager", managerDashboardRouter);
 app.use("/api/createUserLand", landRouter);
 app.use("/api/process", processRouter);
 
