@@ -16,6 +16,7 @@ import divisionRouter from "./src/routes/division.js";
 import implementRouter from "./src/routes/implement.js";
 import managerRouter from "./src/routes/managerDashboard.js";
 import processRouter from "./src/routes/process.js";
+import paymentApprovalRouter from "./src/routes/paymentApproval.js";
 
 import { protect } from "./middleware/auth.js";
 
@@ -68,6 +69,8 @@ app.use("/api/implements", implementRouter);
 app.use("/api/managers", managerRouter);
 app.use("/api/createUserLand", landRouter);
 app.use("/api/process", processRouter);
+app.use("/api/paymentApproval", paymentApprovalRouter);
+
 
 // start server
 app.listen(port, () => {
