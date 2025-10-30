@@ -3,6 +3,8 @@ import express from "express";
 import cors from "cors";
 import "dotenv/config";
 import mongodbConnection from "./src/configs/dbconfig.js";
+import { protect } from "./middleware/auth.js";
+
 import LoginRouter from "./src/routes/auth.js";
 import userRouter from "./src/routes/user.js";
 import landRouter from "./src/routes/land.js";
@@ -12,18 +14,13 @@ import operationRouter from "./src/routes/operation.js";
 import resourceRouter from "./src/routes/resource.js";
 import workDoneRouter from "./src/routes/workDone.js";
 import taskRouter from "./src/routes/task.js";
-import divisionRouter from "./src/routes/divison.js";
+import divisionRouter from "./src/routes/division.js";
+import processRouter from "./src/routes/process.js";
+import billRouter from "./src/routes/bill.js";
+
 import fieldOfficerDashboardRouter from "./src/routes/fieldOfficerDashboard.js";
-import { protect } from "./middleware/auth.js";
-import implementRouter from "./src/routes/implement.js";
 import higherManagerDashboardRouter from "./src/routes/higherManagerDashboard.js";
 import managerDashboardRouter from "./src/routes/managerDashboard.js";
-
-
-import managerRouter from "./src/routes/managerDashboard.js";
-import processRouter from "./src/routes/process.js";
-
-import { protect } from "./middleware/auth.js";
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -70,12 +67,14 @@ app.use("/api/operation", operationRouter);
 app.use("/api/resource", resourceRouter);
 app.use("/api/workdone", workDoneRouter);
 app.use("/api/tasks", taskRouter);
-app.use("/api/implements", implementRouter);
+// app.use("/api/implements", implementRouter);
 app.use("/api/fieldOfficer", fieldOfficerDashboardRouter);
 app.use("/api/higherManager", higherManagerDashboardRouter);
 app.use("/api/manager", managerDashboardRouter);
 app.use("/api/createUserLand", landRouter);
 app.use("/api/process", processRouter);
+
+app.use("/api/bill", billRouter);
 
 // start server
 app.listen(port, () => {
