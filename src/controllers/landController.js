@@ -5,6 +5,7 @@ import {
   updateLand,
   getLand,
   getLandsByFieldOfficer,
+  getLandsByDivision,
 } from "../repositories/land.js";
 
 // Get all lands
@@ -101,93 +102,21 @@ export const deleteLandById = async (req, res) => {
 
 export const getLandsByFieldOfficerId = async (req, res) => {
   try {
-    console.log("in controller");
-
+    // console.log("in controller");
     const { fieldOfficerId } = req.params;
-
-    // 1️⃣ Get lands created by this officer
     const lands = await getLandsByFieldOfficer(fieldOfficerId);
+    res.json(lands);
+  } catch (error) {
+    console.error("Error fetching lands by field officer:", error);
+    res.status(500).json({ error: "Failed to fetch lands progress" });
+  }
+};
 
-    // const result = await Promise.all(
-    //   lands.map(async (land) => {
-    //     // 2️⃣ Populate processes and tasks
-    //     const processes = await Process.find({ landId: land._id })
-    //       .populate("tasks") // make sure "tasks" field exists in Process schema
-    //       .lean();
-
-    //     let currentStatus = "Not Started";
-    //     let currentTask = null;
-    //     let taskProgressPercent = 0;
-    //     let overallProgressPercent = 0;
-
-    //     if (processes.length > 0) {
-    //       // Find ongoing process
-    //       const ongoingProcess = processes.find(
-    //         (p) => p.status === "in progress"
-    //       );
-
-    //       if (ongoingProcess) {
-    //         currentStatus = "In Progress";
-    //         // Pick current task (first in-progress or pending task)
-    //         currentTask =
-    //           ongoingProcess.tasks.find((t) => t.status === "in progress") ||
-    //           ongoingProcess.tasks.find((t) => t.status === "pending") ||
-    //           null;
-
-    //         if (currentTask) {
-    //           // Workdone calculation for task progress
-    //           const workList = await WorkDone.find({ taskId: currentTask._id });
-    //           const totalAmount = workList.reduce(
-    //             (sum, w) => sum + (w.amount ?? 0),
-    //             0
-    //           );
-    //           const expected = currentTask.expected_amount ?? 100;
-    //           taskProgressPercent = Math.min(
-    //             100,
-    //             (totalAmount / expected) * 100
-    //           );
-
-    //           currentStatus = `In Progress - ${currentTask.name}`;
-    //         }
-    //       } else {
-    //         // No ongoing process → mark cycles finished
-    //         currentStatus = `${processes.length} cycles finished`;
-    //       }
-
-    //       // Overall progress calculation
-    //       let totalWeight = 0;
-    //       let weightedSum = 0;
-
-    //       for (const p of processes) {
-    //         for (const t of p.tasks) {
-    //           const workList = await WorkDone.find({ taskId: t._id });
-    //           const totalAmount = workList.reduce(
-    //             (sum, w) => sum + (w.amount ?? 0),
-    //             0
-    //           );
-    //           const expected = t.expected_amount ?? 100;
-    //           const progress = Math.min(100, (totalAmount / expected) * 100);
-
-    //           const weight = 1; // TODO: replace with operation weight if you have `operationId`
-    //           weightedSum += (progress / 100) * weight;
-    //           totalWeight += weight;
-    //         }
-    //       }
-    //       overallProgressPercent =
-    //         totalWeight > 0 ? (weightedSum / totalWeight) * 100 : 0;
-    //     }
-
-    //     return {
-    //       landId: land._id,
-    //       area: `${land.size} ${land.sizeUnitId}`,
-    //       currentStatus,
-    //       currentTask,
-    //       taskProgressPercent,
-    //       overallProgressPercent,
-    //     };
-    //   })
-    // );
-
+export const getLandsByDivisionId = async (req, res) => {
+  try {
+    console.log("in controller");
+    const { managerId } = req.params;
+    const lands = await getLandsByDivision(managerId);
     res.json(lands);
   } catch (error) {
     console.error("Error fetching lands by field officer:", error);

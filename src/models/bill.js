@@ -1,36 +1,40 @@
+// models/bill.js
 import mongoose from "mongoose";
 const { Schema } = mongoose;
 
 const billSchema = new Schema(
   {
-    // _id: { type: String, unique: true },
     process: { type: Schema.Types.ObjectId, ref: "Process", required: true },
-    totalAmount: { type: String },
-    taskSubTotal: [
+
+    // numeric total (use Number for arithmetic)
+    totalAmount: { type: Number, default: 0 },
+
+    // per-task subtotal objects
+    taskSubTotals: [
       {
-        type: Schema.Types.ObjectId,
-        ref: "Task",
+        task: { type: Schema.Types.ObjectId, ref: "Task" },
+        subtotal: { type: Number, default: 0 },
       },
     ],
-    workdoneSubTotal: [
+
+    // per-workdone amounts (optional — keeps traceability)
+    workdoneSubTotals: [
       {
-        type: Schema.Types.ObjectId,
-        ref: "WorkDone",
+        workDone: { type: Schema.Types.ObjectId, ref: "WorkDone" },
+        amount: { type: Number, default: 0 },
       },
     ],
+
     notes: { type: String },
-    status: { type: String, enum: ["Sent for Manager Approval", "Sent for Higher Manager Approval", "Approved"], default: "Sent for Manager Approval" },
+
+    status: {
+      type: String,
+      enum: ["Sent for Manager Approval", "Approved", "Sent for Payment Approval"],
+      default: "Sent for Manager Approval",
+    },
   },
   { timestamps: true }
 );
 
-// billSchema.pre("save", async function (next) {
-//   if (this.isNew) {
-//     const count = await mongoose.model("Bill").countDocuments();
-//     this._id = `BILL${(count + 1).toString().padStart(5, "0")}`;
-//   }
-//   next();
-// });
-
-
 export default mongoose.model("Bill", billSchema, "bill");
+ 
