@@ -14,13 +14,14 @@ export const getFieldOfficerDashboard = async (req, res) => {
       landsInProgress,
       recentOperations,
       recentPayments,
-      progress
+      progressData
     ] = await Promise.all([
       fieldOfficerDashboardRepository.countAssignedLandsByDivision(divisionId),
       fieldOfficerDashboardRepository.countFarmersByDivision(divisionId),
       fieldOfficerDashboardRepository.countLandsInProgressByDivision(divisionId),
       fieldOfficerDashboardRepository.getRecentOperationsByDivision(divisionId),
-      fieldOfficerDashboardRepository.getRecentPaymentsByDivision(divisionId)
+      fieldOfficerDashboardRepository.getRecentPaymentsByDivision(divisionId),
+      fieldOfficerDashboardRepository.getOverallProgressByDivision(divisionId)
     ]);
 
     return res.json({
@@ -42,7 +43,7 @@ export const getFieldOfficerDashboard = async (req, res) => {
           time: pay.time,
         }))
       ],
-      progress: progress || { pending: 0, inProgress: 0, completed: 0 }
+      progress: progressData || { pending: 0, inProgress: 0, completed: 0 }
     });
 
   } catch (err) {
