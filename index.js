@@ -7,7 +7,7 @@ import { protect } from "./middleware/auth.js";
 
 import LoginRouter from "./src/routes/auth.js";
 import userRouter from "./src/routes/user.js";
-import landRouter from "./src/routes/land.js";
+// import landRouter from "./src/routes/land.js";
 import roleRouter from "./src/routes/role.js";
 import unitRouter from "./src/routes/unit.js";
 import operationRouter from "./src/routes/operation.js";
@@ -21,6 +21,8 @@ import billRouter from "./src/routes/bill.js";
 import fieldOfficerDashboardRouter from "./src/routes/fieldOfficerDashboard.js";
 import higherManagerDashboardRouter from "./src/routes/higherManagerDashboard.js";
 import managerDashboardRouter from "./src/routes/managerDashboard.js";
+import createUserLandRoutes from "./src/routes/createUserLandRoutes.js";
+import landRoutes from "./src/routes/landRoutes.js";
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -59,7 +61,7 @@ app.use("/api", protect);
 
 // PROTECTED routes (these will be checked by `protect`)
 app.use("/api/users", userRouter);
-app.use("/api/lands", landRouter);
+// app.use("/api/lands", landRouter);
 app.use("/api/roles", roleRouter);
 app.use("/api/divisions", divisionRouter);
 app.use("/api/unit", unitRouter);
@@ -71,8 +73,10 @@ app.use("/api/tasks", taskRouter);
 app.use("/api/fieldOfficer", fieldOfficerDashboardRouter);
 app.use("/api/higherManager", higherManagerDashboardRouter);
 app.use("/api/manager", managerDashboardRouter);
-app.use("/api/createUserLand", landRouter);
+// app.use("/api/createUserLand", landRouter);
 app.use("/api/process", processRouter);
+app.use("/api/createUserLand", createUserLandRoutes);
+app.use("/api/lands", landRoutes);
 
 app.use("/api/bill", billRouter);
 
