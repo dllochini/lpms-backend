@@ -1,5 +1,5 @@
 // controllers/billController.js
-import { createBillForProcessTransactional, getBillByProcessId, updateBill} from "../repositories/bill.js";
+import { createBillForProcessTransactional, getBillByProcessId, updateBill, getBillsByDivision} from "../repositories/bill.js";
 
 export async function createBillForProcessHandler(req, res) {
   try {
