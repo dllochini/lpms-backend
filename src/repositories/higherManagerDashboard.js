@@ -1,19 +1,22 @@
-// repositories/higherManagerDashboard.js
+// export default higherManagerDashboardRepository;
+
 import mongoose from "mongoose";
 import Land from "../models/land.js";
 import Task from "../models/task.js";
 import Process from "../models/process.js";
 import Bill from "../models/bill.js"; // used for recent payments
-// If you have an Operation model, swap Process/Operation usage as appropriate.
+import Division from "../models/division.js";
 
 const toObjectId = (id) => {
   if (!id) return null;
   return mongoose.Types.ObjectId.isValid(id) ? mongoose.Types.ObjectId(id) : null;
 };
 
-const STATUS_PENDING = ["pending", "todo", "not started"];
+// --- CORRECTED STATUS ARRAYS (ALL LOWERCASE) ---
+const STATUS_PENDING = ["pending", "to do", "not started"];
 const STATUS_IN_PROGRESS = ["in progress", "in-progress", "ongoing", "started", "active"];
-const STATUS_COMPLETED = ["completed", "done", "finished"];
+const STATUS_COMPLETED = ["completed", "approved", "finished"];
+// ---
 
 export const higherManagerDashboardRepository = {
   // --- Get land IDs for a division or all lands
@@ -23,7 +26,6 @@ export const higherManagerDashboardRepository = {
     }
 
     const oid = toObjectId(divisionId);
-    // If valid ObjectId, match by ObjectId. If not, attempt to match by whatever is stored in `division` field.
     const match = oid ? { division: oid } : { division: divisionId };
     return await Land.find(match).distinct("_id").exec();
   },
@@ -33,7 +35,6 @@ export const higherManagerDashboardRepository = {
     const landIds = await this.getLandIds({ divisionId });
     const totalLands = landIds.length;
 
-    // Sum area (handle both 'area' or 'size' fields and string numbers)
     const totalAreaAgg = await Land.aggregate([
       { $match: { _id: { $in: landIds } } },
       {
@@ -48,7 +49,6 @@ export const higherManagerDashboardRepository = {
 
     const totalArea = totalAreaAgg[0]?.totalArea || 0;
 
-    // Count distinct divisions represented in these lands
     const divisionsCount = await Land.find({ _id: { $in: landIds } }).distinct("division").exec();
 
     const landsInProgress = await this.countLandsInProgress({ landIds });
@@ -61,62 +61,100 @@ export const higherManagerDashboardRepository = {
     };
   },
 
+  // --- CORRECTED HELPER: Get Land IDs that are "in progress" (case-insensitive) ---
+  async getInProgressLandIds({ landIds } = {}) {
+    if (!Array.isArray(landIds) || landIds.length === 0) return [];
+
+    // 1. Find processes that belong to these lands
+    const processIds = await Process.find({ land: { $in: landIds } }).distinct("_id").exec();
+    if (!processIds.length) return [];
+
+    // 2. Use an aggregation to find tasks with a case-insensitive status match
+    //    This now matches the logic in getProgress()
+    const tasks = await Task.aggregate([
+      {
+        $match: { // Match the process ID
+          $or: [
+            { process: { $in: processIds } },
+            { processId: { $in: processIds } },
+            { processID: { $in: processIds } }
+          ]
+        }
+      },
+      {
+        $project: { // Project the normalized status and a single process ID
+          status: { $toLower: { $ifNull: ["$status", ""] } },
+          processIdField: { $ifNull: ["$process", "$processId", "$processID"] }
+        }
+      },
+      {
+        $match: { // Match the normalized status
+          status: { $in: STATUS_IN_PROGRESS } // STATUS_IN_PROGRESS is already lowercase
+        }
+      }
+    ]).exec();
+
+    if (!tasks.length) return [];
+
+    // 3. collect used process ids
+    const usedProcessIds = new Set(tasks.map(t => String(t.processIdField)));
+    if (!usedProcessIds.size) return [];
+
+    // 4. Find processes -> lands
+    const processes = await Process.find({ _id: { $in: Array.from(usedProcessIds) } }).select("land").lean().exec();
+    
+    // 5. Return the raw list of land ObjectIds
+    return processes.map(p => p.land);
+  },
+  // ---
+
   // --- Count lands with at least one task in progress
   async countLandsInProgress({ landIds } = {}) {
-    if (!Array.isArray(landIds) || landIds.length === 0) return 0;
+    // 1. Call the new helper function
+    const inProgressIds = await this.getInProgressLandIds({ landIds });
 
-    // Find processes that belong to these lands
-    const processIds = await Process.find({ land: { $in: landIds } }).distinct("_id").exec();
-    if (!processIds.length) return 0;
-
-    // Tasks may reference the process using various field names: 'process', 'processId', 'processID'
-    const tasks = await Task.find({
-      $or: [
-        { process: { $in: processIds } },
-        { processId: { $in: processIds } },
-        { processID: { $in: processIds } }
-      ],
-      status: { $in: STATUS_IN_PROGRESS }
-    }).select(["process", "processId", "processID"]).lean().exec();
-
-    if (!tasks.length) return 0;
-
-    // collect used process ids from the task records (account for various field names)
-    const usedProcessIds = new Set();
-    for (const t of tasks) {
-      if (t.process) usedProcessIds.add(String(t.process));
-      else if (t.processId) usedProcessIds.add(String(t.processId));
-      else if (t.processID) usedProcessIds.add(String(t.processID));
-    }
-
-    if (!usedProcessIds.size) return 0;
-
-    // Find processes -> lands
-    const processes = await Process.find({ _id: { $in: Array.from(usedProcessIds) } }).select("land").lean().exec();
-    const landIdsInProgress = new Set(processes.map(p => String(p.land)));
+    // 2. Count the unique lands
+    const landIdsInProgress = new Set(inProgressIds.map(p => String(p)));
     return landIdsInProgress.size;
   },
 
-  // --- Land overview graph (monthly land registrations)
+  // --- Land overview graph (by Division)
   async getGraphData({ divisionId } = {}) {
     const landIds = await this.getLandIds({ divisionId });
 
     if (!landIds.length) {
-      // return zeroed months
-      const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-      return monthNames.map((m) => ({ month: m, count: 0 }));
+      return [];
     }
 
-    const raw = await Land.aggregate([
-      { $match: { _id: { $in: landIds } } },
-      { $project: { month: { $month: { $ifNull: ["$createdAt", new Date()] } } } },
-      { $group: { _id: "$month", count: { $sum: 1 } } },
-      { $sort: { _id: 1 } }
-    ]).exec();
+    const divisionIds = await Land.find({ _id: { $in: landIds } }).distinct("division").exec();
+    if (!divisionIds.length) {
+      return [];
+    }
 
-    const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-    const byMonth = new Map(raw.map(r => [Number(r._id), r.count]));
-    return monthNames.map((name, idx) => ({ month: name, count: byMonth.get(idx + 1) ?? 0 }));
+    const rawTotals = await Land.aggregate([
+      { $match: { _id: { $in: landIds } } },
+      { $group: { _id: "$division", total: { $sum: 1 } } }
+    ]).exec();
+    const totalsByDivision = new Map(rawTotals.map(r => [String(r._id), r.total]));
+
+    const inProgressLandIds = await this.getInProgressLandIds({ landIds });
+    
+    let inProgressByDivision = new Map();
+    if (inProgressLandIds.length > 0) {
+      const rawInProgress = await Land.aggregate([
+        { $match: { _id: { $in: inProgressLandIds } } },
+        { $group: { _id: "$division", inProgress: { $sum: 1 } } }
+      ]).exec();
+      inProgressByDivision = new Map(rawInProgress.map(r => [String(r._id), r.inProgress]));
+    }
+
+    const divisions = await Division.find({ _id: { $in: divisionIds } }).select("name").lean().exec();
+
+    return divisions.map(div => ({
+      name: div.name || "Unknown Division",
+      "Total Lands": totalsByDivision.get(String(div._id)) ?? 0,
+      "Lands In-progress": inProgressByDivision.get(String(div._id)) ?? 0,
+    }));
   },
 
   // --- Land coverage graph (area per division)
@@ -125,7 +163,6 @@ export const higherManagerDashboardRepository = {
 
     if (!landIds.length) return [];
 
-    // Sum area per division, using fallback to size if area is absent
     const coverage = await Land.aggregate([
       { $match: { _id: { $in: landIds } } },
       {
@@ -143,13 +180,13 @@ export const higherManagerDashboardRepository = {
 
   // --- Combined dashboard for frontend (cards)
   async getHigherManagerDashboardCardInfo({ divisionId } = {}) {
-    const [overview, graph, coverage] = await Promise.all([
+    const [overview, graph,  progress ] = await Promise.all([
       this.getOverview({ divisionId }),
       this.getGraphData({ divisionId }),
-      this.getCoverageData({ divisionId }),
+      this.getProgress({ divisionId }),
     ]);
 
-    return { overview, graph, coverage };
+    return { overview, graph, progress };
   },
 
   // --- Recent operations (using Process as 'operation' here)
@@ -162,22 +199,18 @@ export const higherManagerDashboardRepository = {
 
   // --- Recent payments (assumes a Bill model)
   async getRecentPayments({ divisionId } = {}, limit = 6) {
-    // If bills are linked to lands/processes with a land or division ref, adapt this query.
-    // Here we just return recent bills (you can filter by division if bill has that field).
     const bills = await Bill.find({}).sort({ createdAt: -1 }).limit(limit).lean().exec();
     return bills;
   },
 
-  // --- Progress summary (counts tasks by status for given division)
+  // --- Progress summary (counts tasks by status for given division) (CLEANED)
   async getProgress({ divisionId } = {}) {
     const landIds = await this.getLandIds({ divisionId });
     if (!landIds.length) return { pending: 0, inProgress: 0, completed: 0 };
 
-    // get process ids for these lands
     const processIds = await Process.find({ land: { $in: landIds } }).distinct("_id").exec();
     if (!processIds.length) return { pending: 0, inProgress: 0, completed: 0 };
 
-    // count tasks by status (considering multiple possible process reference fields)
     const match = {
       $and: [
         {
@@ -208,6 +241,7 @@ export const higherManagerDashboardRepository = {
     ];
 
     const rawCounts = await Task.aggregate(pipeline).exec();
+
     let pending = 0, inProgress = 0, completed = 0;
     for (const r of rawCounts) {
       const st = String(r._id || "").trim();
@@ -215,7 +249,6 @@ export const higherManagerDashboardRepository = {
       else if (STATUS_IN_PROGRESS.includes(st)) inProgress += r.count;
       else if (STATUS_PENDING.includes(st)) pending += r.count;
       else {
-        // unknown status → treat as pending by default
         pending += r.count;
       }
     }
