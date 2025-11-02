@@ -1,5 +1,5 @@
 // repositories/fieldOfficerDashboard.js
-
+import mongoose from "mongoose";
 import Land from "../models/land.js";
 import User from "../models/user.js";
 import Task from "../models/task.js";
@@ -62,26 +62,42 @@ export const fieldOfficerDashboardRepository = {
     if (!mongoose.Types.ObjectId.isValid(divisionId)) {
       return { pending: 0, inProgress: 0, completed: 0 };
     }
-  
+ 
     // Step 1: Get all lands in the division
     const landIds = await Land.find({ division: divisionId }).distinct("_id");
-    console.log("Land IDs:", landIds);
     if (landIds.length === 0) return { pending: 0, inProgress: 0, completed: 0 };
-  
+ 
     // Step 2: Get all processes for these lands
     const processIds = await Process.find({ land: { $in: landIds } }).distinct("_id");
-    console.log("Process IDs:", processIds);
     if (processIds.length === 0) return { pending: 0, inProgress: 0, completed: 0 };
-  
+ 
     // Step 3: Count tasks by status
     const totalTasks = await Task.countDocuments({ process: { $in: processIds } });
-    console.log("Total Tasks:", totalTasks);
     if (totalTasks === 0) return { pending: 0, inProgress: 0, completed: 0 };
-  
-    const pendingTasks = await Task.countDocuments({ process: { $in: processIds }, status: "Pending" });
-    const inProgressTasks = await Task.countDocuments({ process: { $in: processIds }, status: "In Progress" });
-    const completedTasks = await Task.countDocuments({ process: { $in: processIds }, status: "Completed" });
-  
+ 
+    // --- THIS IS THE FIX ---
+    // We now match the *exact* statuses your database uses
+    
+    // Your DB uses "Approved" for the "Pending" state.
+    const pendingTasks = await Task.countDocuments({ 
+      process: { $in: processIds }, 
+      status: { $regex: /pending/i } // <-- FIX: Changed from "Pending"
+    });
+    
+    // Your DB uses "In Progress"
+    const inProgressTasks = await Task.countDocuments({ 
+      process: { $in: processIds }, 
+      status: { $regex: /in progress/i } // <-- This one is correct
+    });
+    
+    // We will look for "Completed" for the future
+    const completedTasks = await Task.countDocuments({ 
+      process: { $in: processIds }, 
+      status: { $regex: /approved/i }
+    });
+    // --- END OF FIX ---
+
+    // Calculate percentages
     return {
       pending: Math.round((pendingTasks / totalTasks) * 100),
       inProgress: Math.round((inProgressTasks / totalTasks) * 100),
@@ -91,7 +107,7 @@ export const fieldOfficerDashboardRepository = {
   // Get recent operations in this division
   async getRecentOperationsByDivision(divisionId, limit = 5) {
     const landIds = await Land.find({ division: divisionId }).distinct("_id");
-    const processIds = await Process.find({ land: { $in: landIds } }).distinct("_id");
+   const processIds = await Process.find({ land: { $in: landIds } }).distinct("_id");
   
     const tasks = await Task.find({ process: { $in: processIds } })
       .sort({ createdAt: -1 })
@@ -108,10 +124,10 @@ export const fieldOfficerDashboardRepository = {
   // Get recent payments in this division
   async getRecentPaymentsByDivision(divisionId, limit = 5) {
     const landIds = await Land.find({ division: divisionId }).distinct("_id");
-    const processIds = await Process.find({ landID: { $in: landIds } }).distinct("_id");
+    const processIds = await Process.find({ land: { $in: landIds } }).distinct("_id");
 
     // Adjust if you have a separate Payment model
-    const payments = await Task.find({ processID: { $in: processIds }, status: "paid" })
+    const payments = await Task.find({ process: { $in: processIds }, status: "paid" })
       .sort({ updatedAt: -1 })
       .limit(limit)
       .select("_id name updatedAt");
