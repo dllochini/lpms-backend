@@ -27,24 +27,34 @@ import landRoutes from "./src/routes/landRoutes.js";
 const app = express();
 const port = process.env.PORT || 3000;
 
-const allowedOrigins = [process.env.FRONTEND_URL];
+const allowedOrigins = [
+  'https://lpms-frontend-p2vwebnuf-lochini-dikkumburas-projects.vercel.app',
+  process.env.FRONTEND_URL,
+  'http://localhost:3000',    // local dev, remove if not needed
+  'http://localhost:5173',     // vite default (optional)
+
+].filter(Boolean);
 
 const corsOptions = {
   origin: (origin, callback) => {
+    // allow requests with no origin (Postman, curl, server-to-server)
+    if (!origin) return callback(null, true);
+
     if (allowedOrigins.includes(origin)) {
-      // allow requests from tools/postman (no origin) and allowed origins
       callback(null, true);
     } else {
-      callback(new Error("Not allowed by CORS"));
+      callback(new Error('Not allowed by CORS'));
     }
   },
 };
 
-app.use(cors(corsOptions));
-app.use(express.json());
 
 //set the upload folder as static
 app.use("/uploads", express.static("./uploads"));
+
+app.use(cors(corsOptions));
+app.use(express.json());
+
 
 // Connect DB
 const connectDb = async () => {
