@@ -25,6 +25,12 @@ import createUserLandRoutes from "./src/routes/createUserLandRoutes.js";
 import landRoutes from "./src/routes/landRoutes.js";
 
 const app = express();
+
+// Example route
+app.get('/', (req, res) => {
+  res.send('Hello World!');
+});
+
 const port = process.env.PORT || 3000;
 
 const allowedOrigins = [
