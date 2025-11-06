@@ -32,7 +32,7 @@ app.get('/health', (req, res) => res.json({ status: 'ok' }));
 const port = process.env.PORT || 3000;
 
 const allowedOrigins = [
-  "https://lpms-frontend-p2vwebnuf-lochini-dikkumburas-projects.vercel.app",
+  "https://lpms-frontend.vercel.app",
   process.env.FRONTEND_URL,
 ].filter(Boolean);
 
