@@ -26,10 +26,8 @@ import landRoutes from "./src/routes/landRoutes.js";
 
 const app = express();
 
-// Example route
-app.get('/', (req, res) => {
-  res.send('Hello World!');
-});
+app.get('/', (req, res) => res.send('Hello from lpms-backend!'));
+app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
 const port = process.env.PORT || 3000;
 
