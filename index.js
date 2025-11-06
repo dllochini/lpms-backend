@@ -28,11 +28,8 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 const allowedOrigins = [
-  'https://lpms-frontend-p2vwebnuf-lochini-dikkumburas-projects.vercel.app',
+  "https://lpms-frontend-p2vwebnuf-lochini-dikkumburas-projects.vercel.app",
   process.env.FRONTEND_URL,
-  'http://localhost:3000',    // local dev, remove if not needed
-  'http://localhost:5173',     // vite default (optional)
-
 ].filter(Boolean);
 
 const corsOptions = {
@@ -43,18 +40,16 @@ const corsOptions = {
     if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      callback(new Error("Not allowed by CORS"));
     }
   },
 };
-
 
 //set the upload folder as static
 app.use("/uploads", express.static("./uploads"));
 
 app.use(cors(corsOptions));
 app.use(express.json());
-
 
 // Connect DB
 const connectDb = async () => {
