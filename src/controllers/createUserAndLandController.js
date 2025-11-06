@@ -23,7 +23,8 @@ export const createUserAndLand = async (req, res) => {
       designation: body.designation,
       nic: body.nic,
       address: userAddress,
-      contactNo: body.contact_no,
+      division: body.division, // 1️⃣ --- FIX 1: Add division to User model
+      contactNo: body.contactNo,
       accountNo: body.accountNo || body.account_Number,
       bank: body.bank,
       branch: body.branch,
