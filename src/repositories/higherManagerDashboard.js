@@ -1,5 +1,3 @@
-// export default higherManagerDashboardRepository;
-
 import mongoose from "mongoose";
 import Land from "../models/land.js";
 import Task from "../models/task.js";
@@ -178,31 +176,6 @@ export const higherManagerDashboardRepository = {
     return coverage.map(c => ({ divisionId: c._id ?? null, area: c.area }));
   },
 
-  // --- Combined dashboard for frontend (cards)
-  async getHigherManagerDashboardCardInfo({ divisionId } = {}) {
-    const [overview, graph,  progress ] = await Promise.all([
-      this.getOverview({ divisionId }),
-      this.getGraphData({ divisionId }),
-      this.getProgress({ divisionId }),
-    ]);
-
-    return { overview, graph, progress };
-  },
-
-  // --- Recent operations (using Process as 'operation' here)
-  async getRecentOperations({ divisionId } = {}, limit = 6) {
-    const landIds = await this.getLandIds({ divisionId });
-    const match = landIds.length ? { land: { $in: landIds } } : {};
-    const ops = await Process.find(match).sort({ startDate: -1 }).limit(limit).lean().exec();
-    return ops;
-  },
-
-  // --- Recent payments (assumes a Bill model)
-  async getRecentPayments({ divisionId } = {}, limit = 6) {
-    const bills = await Bill.find({}).sort({ createdAt: -1 }).limit(limit).lean().exec();
-    return bills;
-  },
-
   // --- Progress summary (counts tasks by status for given division) (CLEANED)
   async getProgress({ divisionId } = {}) {
     const landIds = await this.getLandIds({ divisionId });
@@ -254,7 +227,132 @@ export const higherManagerDashboardRepository = {
     }
 
     return { pending, inProgress, completed };
-  }
+  },
+
+  // --- Recent operations (using Process as 'operation' here)
+  async getRecentOperations({ divisionId } = {}, limit = 6) {
+    const landIds = await this.getLandIds({ divisionId });
+    const match = landIds.length ? { land: { $in: landIds } } : {};
+    const ops = await Process.find(match).sort({ startDate: -1 }).limit(limit).lean().exec();
+    return ops;
+  },
+
+  // --- Recent payments (assumes a Bill model)
+  async getRecentPayments({ divisionId } = {}, limit = 6) {
+    const bills = await Bill.find({}).sort({ createdAt: -1 }).limit(limit).lean().exec();
+    return bills;
+  },
+
+  // --- NEW HELPER: Get Task Stats for a set of Land IDs ---
+  async getTaskStatsForLands(landIds) {
+    if (!landIds || landIds.length === 0) {
+      return { percentComplete: 0, overdueTasks: 0 };
+    }
+    
+    // 1. Find processes for these lands
+    const processIds = await Process.find({ land: { $in: landIds } }).distinct("_id").exec();
+    if (!processIds.length) {
+      return { percentComplete: 0, overdueTasks: 0 };
+    }
+
+    // 2. Use Aggregation to get all stats in one go
+    const taskStatsAgg = await Task.aggregate([
+      { $match: { 
+          $or: [
+            { process: { $in: processIds } },
+            { processId: { $in: processIds } },
+            { processID: { $in: processIds } }
+          ]
+      }},
+      { $project: {
+          status: { $toLower: { $ifNull: ["$status", ""] } },
+          // --- IMPORTANT ---
+          // Assumes your Task model has an 'endDate' or 'dueDate' field.
+          // Change "endDate" to your actual field name.
+          endDate: { $toDate: "$endDate" } 
+      }},
+      { $group: {
+          _id: null, // Group all tasks for these lands together
+          totalTasks: { $sum: 1 },
+          completedTasks: {
+            $sum: { $cond: [{ $in: ["$status", STATUS_COMPLETED] }, 1, 0] }
+          },
+          overdueTasks: {
+            $sum: {
+              $cond: [
+                { $and: [
+                    { $lt: ["$endDate", new Date()] }, // endDate is in the past
+                    { $not: { $in: ["$status", STATUS_COMPLETED] } } // and task is not done
+                ]}
+              , 1, 0 ]
+            }
+          }
+      }}
+    ]);
+
+    const stats = taskStatsAgg[0];
+
+    // Handle no tasks found
+    if (!stats || stats.totalTasks === 0) {
+      return { percentComplete: 0, overdueTasks: 0 };
+    }
+
+    const percentComplete = Math.round((stats.completedTasks / stats.totalTasks) * 100);
+    
+    return {
+      percentComplete: percentComplete,
+      overdueTasks: stats.overdueTasks || 0
+    };
+  },
+
+  // --- NEW: Get data for the Division Performance Table ---
+  async getDivisionPerformance() {
+    // 1. Get all divisions that have lands
+    const allLandIds = await this.getLandIds({});
+    if (!allLandIds.length) return [];
+    
+    const divisionIds = await Land.find({ _id: { $in: allLandIds } }).distinct("division").exec();
+    const divisions = await Division.find({ _id: { $in: divisionIds } }).select("name").lean().exec();
+
+    if (!divisions.length) return [];
+
+    // 2. Map over each division and fetch its stats
+    const performanceData = await Promise.all(
+      divisions.map(async (div) => {
+        const divId = div._id;
+
+        // Get land IDs for *this* division
+        const landIds = await Land.find({ division: divId }).distinct("_id").exec();
+        
+        // Get lands in progress (reuse existing logic)
+        const landsInProgress = await this.countLandsInProgress({ landIds });
+        
+        // Get task stats (use new helper)
+        const { percentComplete, overdueTasks } = await this.getTaskStatsForLands(landIds);
+
+        return {
+          divisionName: div.name || "Unknown Division",
+          landsInProgress: landsInProgress,
+          percentComplete: percentComplete,
+          overdueTasks: overdueTasks
+        };
+      })
+    );
+
+    return performanceData;
+  },
+
+  // --- MODIFIED: Combined dashboard for frontend (cards) ---
+  async getHigherManagerDashboardCardInfo({ divisionId } = {}) {
+    const [overview, graph, progress, divisionPerformance] = await Promise.all([
+      this.getOverview({ divisionId }),
+      this.getGraphData({ divisionId }),
+      this.getProgress({ divisionId }),
+      this.getDivisionPerformance(), // <-- ADDED
+    ]);
+
+    return { overview, graph, progress, divisionPerformance }; // <-- MODIFIED
+  },
 };
 
 export default higherManagerDashboardRepository;
