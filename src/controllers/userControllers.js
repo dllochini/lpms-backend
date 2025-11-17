@@ -4,6 +4,7 @@ import {
   getUser,
   updateUser,
   deleteUser,
+  getAllFarmers,
 } from "../repositories/user.js";
 
 // Get all users
@@ -17,6 +18,19 @@ export const getUsers = async (req, res) => {
   }
 };
 
+export const getFarmers = async (req, res) => {
+  try {
+    const farmers = await getAllFarmers();
+    console.log("Farmers:", farmers);
+    res.json(farmers);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+
+
 // Get user by ID
 export const getUserById = async (req, res) => {
   const userId = req.params.id;
@@ -29,6 +43,8 @@ export const getUserById = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+
 
 // Create new user
 export const addNewUser = async (req, res) => {
