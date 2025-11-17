@@ -155,6 +155,7 @@ export const managerDashboardRepository = {
 
     const landIds = await getLandIdsForDivision(divisionId);
     const processIds = await getProcessIdsForDivision(divisionId, landIds);
+    console.log("DEBUG landIds:", processIds);
 
     const orConditions = [
       { division: divisionId },
@@ -164,23 +165,28 @@ export const managerDashboardRepository = {
         ? [
             { process: { $in: processIds } },
             { processId: { $in: processIds } },
-            { process_id: { $in: processIds } },
+            { "process.id": { $in: processIds } },
           ]
         : []),
     ];
 
     const payments = await Bill.find({
-      $or: orConditions,
-      status: "Sent for Manager Approval",
-    })
-      .sort({ created_at: -1 })
-      .limit(limit)
-      .populate({
-        path: "process",
-        populate: { path: "land", populate: "createdBy" },
-      })
-      // .populate({ path: "payer", select: "_id fullName name" }) // ✅ populate payer
-      .lean();
+  status: "Sent for Manager Approval",
+  $or: [
+    { division: divisionId },
+    { "division._id": divisionId },
+    { land: { $in: landIds } },
+    { process: { $in: processIds } }
+  ]
+})
+.sort({ createdAt: -1 })
+.limit(limit)
+.populate({
+  path: "process",
+  populate: { path: "land", populate: "createdBy" }
+})
+.lean();
+
     console.log("DEBUG payments:", payments);
 
     return payments;

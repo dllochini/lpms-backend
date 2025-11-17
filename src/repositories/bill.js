@@ -162,9 +162,10 @@ export const getBillsByDivision = async (userId) => {
     }
 
     const divisionId = user.division._id;
+    console.log("Manager's division ID:", divisionId);
 
     // 2️⃣ Get all bills and deeply populate
-    const bills = await Bill.find({ status: "Sent for Manager Approval" })
+    const bills = await Bill.find({ status: "Sent for Manager Approval" || "Sent for Payment Approval" })
       .populate({
         path: "process",
         populate: {
@@ -186,11 +187,12 @@ export const getBillsByDivision = async (userId) => {
       })
       .lean();
 
-    // 3️⃣ Keep only bills belonging to manager's division
-    const filteredBills = bills.filter(
-      (bill) =>
-        bill?.process?.land?.division?._id?.toString() === divisionId.toString()
-    );
+      console.log("Fetched bills:", bills);
+      // 3️⃣ Keep only bills belonging to manager's division
+      const filteredBills = bills.filter(
+        (bill) =>
+          bill?.process?.land?.division?._id?.toString() === divisionId.toString()
+      );
 
     return filteredBills;
   } catch (error) {

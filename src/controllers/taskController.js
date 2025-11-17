@@ -5,7 +5,7 @@ export const createTask = async (req, res) => {
     const taskData = req.body;
     console.log(taskData,"data");
     const newTask = await taskRepo.createTask(taskData);
-    res.status(201).json(newTask);
+    res.status(201).json(newTask.toObject());
   } catch (error) {
     console.error("Error creating task:", error);
     res.status(500).json({ message: "Failed to create task", error });

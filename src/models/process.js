@@ -7,7 +7,7 @@ const processSchema = new Schema(
     land: { type: Schema.Types.ObjectId, ref: "Land", required: true },
     startedDate: { type: Date, required: false },
     endDate: { type: Date, required: false },
-    status: { type: String, maxlength: 255, enum: ["Not started", "In Progress", "Done"], default: "Not started" },
+    status: { type: String, maxlength: 255, enum: ["Not started", "In Progress", "Done","Sent for Payment Approval"], default: "Not started" },
     updatedHistory: [
       {
         updatedAt: { type: Date, default: Date.now },
