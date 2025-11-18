@@ -24,7 +24,6 @@ export const getAllResources = async (req, res) => {
     const resources = await getResources();
     // console.log("response:", resources);
     res.status(200).json({ data: resources });
-
   } catch (error) {
     console.error(error);
     res

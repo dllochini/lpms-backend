@@ -1,4 +1,3 @@
-// routes/billRoutes.js
 import express from "express";
 import { createBillForProcessHandler, getBillByProcess, getBillsByDivisionController, updateBillById } from "../controllers/billController.js";
 const router = express.Router();

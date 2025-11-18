@@ -1,9 +1,19 @@
 import User from "../models/user.js";
+import Role from "../models/role.js";
 
 export const getAllUsers = async () => {
   const users = await User.find().populate("role").populate("division");
   return users;
 };
+
+export const getAllFarmers = async () => {
+  const farmerRole = await Role.findOne({ name: "Farmer" });
+
+  if (!farmerRole) return [];
+
+  return User.find({ role: farmerRole._id }).populate("role");
+};
+
 
 export const getUser = async (userId) => {
   const user = await User.findById(userId).populate("role").populate("division");

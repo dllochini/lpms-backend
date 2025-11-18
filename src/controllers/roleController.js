@@ -1,6 +1,5 @@
 import { getAllRoles } from "../repositories/role.js";
 
-
 export const getRoles = async (req, res) => {
   try {
     const results = await getAllRoles();
@@ -12,7 +11,6 @@ export const getRoles = async (req, res) => {
   }
 };
 
-export default{
-    getRoles,
-}
-
+export default {
+  getRoles,
+};
