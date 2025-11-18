@@ -4,15 +4,15 @@ import {
   getUnit,
   createUnit,
   updateUnit,
-  deleteUnit
+  deleteUnit,
 } from "../controllers/unitController.js";
 
 const router = express.Router();
 
-router.get("/", getUnits);          // GET /units
-router.get("/:id", getUnit);        // GET /units/:id
-router.post("/", createUnit);       // POST /units
-router.put("/:id", updateUnit);     // PUT /units/:id
-router.delete("/:id", deleteUnit);  // DELETE /units/:id
+router.get("/", getUnits);
+router.get("/:id", getUnit);
+router.post("/", createUnit);
+router.put("/:id", updateUnit);
+router.delete("/:id", deleteUnit);
 
 export default router;

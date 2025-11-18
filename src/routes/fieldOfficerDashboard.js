@@ -3,7 +3,6 @@ import { getFieldOfficerDashboard } from "../controllers/fieldOfficerDashboard.j
 
 const router = express.Router();
 
-// GET dashboard for a specific division
 router.get("/division/:divisionId/cards", getFieldOfficerDashboard);
 
 export default router;
