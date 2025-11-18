@@ -23,13 +23,15 @@ import createUserLandRoutes from "./src/routes/createUserLandRoutes.js";
 import landRoutes from "./src/routes/landRoutes.js";
 
 const app = express();
+
+app.get('/', (req, res) => res.send('Hello from lpms-backend!'));
+app.get('/health', (req, res) => res.json({ status: 'ok' }));
+
 const port = process.env.PORT || 3000;
 
 const allowedOrigins = [
-  "https://lpms-frontend-p2vwebnuf-lochini-dikkumburas-projects.vercel.app",
+  "https://lpms-frontend.vercel.app",
   process.env.FRONTEND_URL,
-  "http://localhost:3000",
-  "http://localhost:5173",
 ].filter(Boolean);
 
 const corsOptions = {
@@ -43,6 +45,7 @@ const corsOptions = {
     }
   },
 };
+
 
 app.use("/uploads", express.static("./uploads"));
 
