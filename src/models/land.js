@@ -3,15 +3,14 @@ const { Schema } = mongoose;
 
 const landSchema = new Schema(
   {
-    // _id: { type: String, unique: true },
     farmer: { type: Schema.Types.ObjectId, ref: "User", required: true },
-    division: { type: Schema.Types.ObjectId, ref: "Division", required: true }, // divisionID (FK)
+    division: { type: Schema.Types.ObjectId, ref: "Division", required: true },
     unit: { type: Schema.Types.ObjectId, ref: "Unit" },
     size: { type: String, required: true },
     address: { type: String },
-    images: [{ type: Schema.Types.Mixed }], // could be array of file refs/URLs or objects
-    documents: [{ type: Schema.Types.Mixed }], // same as images
-    signedAgreement: { type: Schema.Types.Mixed }, // boolean, file ref, or object
+    images: [{ type: Schema.Types.Mixed }],
+    documents: [{ type: Schema.Types.Mixed }],
+    signedAgreement: { type: Schema.Types.Mixed },
     createdBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
     updatedBy: { type: Schema.Types.ObjectId, ref: "User" },
     notes: { type: String },
@@ -19,19 +18,11 @@ const landSchema = new Schema(
       {
         updatedAt: { type: Date, default: Date.now },
         updatedBy: { type: Schema.Types.ObjectId, ref: "User" },
-        changes: { type: Schema.Types.Mixed }, // optional: track what changed
+        changes: { type: Schema.Types.Mixed },
       },
     ],
   },
   { timestamps: true }
-); // ✅ auto-generates createdAt & updatedAt
-
-// landSchema.pre("save", async function (next) {
-//   if (this.isNew) {
-//     const count = await mongoose.model("Land").countDocuments();
-//     this._id = `LAND${(count + 1).toString().padStart(5, "0")}`;
-//   }
-//   next();
-// });
+);
 
 export default mongoose.model("Land", landSchema, "land");
