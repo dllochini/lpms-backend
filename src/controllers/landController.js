@@ -8,11 +8,10 @@ import {
   getLandsByDivision,
 } from "../repositories/land.js";
 
-// Get all lands
 export const getLands = async (req, res) => {
   try {
     const results = await getAllLands();
-    console.log(results.length, "lands found ");
+    // console.log(results.length, "lands found ");
     res.json(results);
   } catch (error) {
     console.error("Error fetching lands:", error);
@@ -20,7 +19,6 @@ export const getLands = async (req, res) => {
   }
 };
 
-// Get land by ID
 export const getLandById = async (req, res) => {
   const landId = req.params.id;
 
@@ -40,7 +38,6 @@ export const addNewLand = async (req, res) => {
   try {
     const landData = req.body;
 
-    // Handle uploaded files
     if (req.files) {
       if (req.files.images) {
         landData.images = req.files.images.map((f) => ({
@@ -70,7 +67,6 @@ export const addNewLand = async (req, res) => {
   }
 };
 
-// Update land by ID
 export const updateLandById = async (req, res) => {
   const landId = req.params.id;
   try {
@@ -85,7 +81,6 @@ export const updateLandById = async (req, res) => {
   }
 };
 
-// Delete land by ID
 export const deleteLandById = async (req, res) => {
   const landId = req.params.id;
   try {
@@ -114,7 +109,7 @@ export const getLandsByFieldOfficerId = async (req, res) => {
 
 export const getLandsByDivisionId = async (req, res) => {
   try {
-    console.log("in controller");
+    // console.log("in controller");
     const { managerId } = req.params;
     const lands = await getLandsByDivision(managerId);
     res.json(lands);

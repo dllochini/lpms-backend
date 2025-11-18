@@ -1,5 +1,9 @@
-// controllers/billController.js
-import { createBillForProcessTransactional, getBillByProcessId, updateBill, getBillsByDivision} from "../repositories/bill.js";
+import {
+  createBillForProcessTransactional,
+  getBillByProcessId,
+  updateBill,
+  getBillsByDivision,
+} from "../repositories/bill.js";
 
 export async function createBillForProcessHandler(req, res) {
   try {
@@ -10,7 +14,7 @@ export async function createBillForProcessHandler(req, res) {
     const bill = await createBillForProcessTransactional({
       processId,
       notes: notes || "",
-      processStatusToSet: "Sent for Payment Approval", // optional
+      processStatusToSet: "Sent for Payment Approval",
       billStatus: "Sent for Manager Approval",
     });
 
@@ -49,7 +53,7 @@ export const updateBillById = async (req, res) => {
   try {
     const { billId } = req.params;
     const updateData = req.body;
-    console.log("hello", billId, updateData);
+    // console.log(billId, updateData);
 
     const updatedBill = await updateBill(billId, updateData);
     if (!updatedBill)

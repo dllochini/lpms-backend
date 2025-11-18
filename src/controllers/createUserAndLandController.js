@@ -4,11 +4,10 @@ import { createLand } from "../repositories/land.js";
 export const createUserAndLand = async (req, res) => {
   try {
     console.log("req.body:", req.body);
-    console.log("req.files:", req.files);
+    // console.log("req.files:", req.files);
 
     const body = req.body || {};
 
-    // ✅ Safely extract addresses
     const addresses = Array.isArray(body.address)
       ? body.address
       : [body.address];
@@ -17,13 +16,12 @@ export const createUserAndLand = async (req, res) => {
 
     const createdBy = req.user?._id || body.createdBy || null;
 
-    // ✅ User payload
     const userPayload = {
       fullName: body.fullName,
       designation: body.designation,
       nic: body.nic,
       address: userAddress,
-      division: body.division, // 1️⃣ --- FIX 1: Add division to User model
+      division: body.division,
       contactNo: body.contactNo,
       accountNo: body.accountNo || body.account_Number,
       bank: body.bank,
@@ -50,7 +48,6 @@ export const createUserAndLand = async (req, res) => {
 
     const newUser = await createUser(userPayload);
 
-    // ✅ Land payload
     const landPayload = {
       farmer: newUser._id,
       division: body.division,
