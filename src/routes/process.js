@@ -1,5 +1,10 @@
 import express from "express";
-import { createProcessById, deleteProcessById, processesByLandHandler, updateProcessById } from "../controllers/processController.js";
+import {
+  createProcessById,
+  deleteProcessById,
+  processesByLandHandler,
+  updateProcessById,
+} from "../controllers/processController.js";
 
 const router = express.Router();
 router.get("/:landId", processesByLandHandler);

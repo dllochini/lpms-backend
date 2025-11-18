@@ -4,9 +4,9 @@ import {
   getUser,
   updateUser,
   deleteUser,
+  getAllFarmers,
 } from "../repositories/user.js";
 
-// Get all users
 export const getUsers = async (req, res) => {
   try {
     const users = await getAllUsers();
@@ -17,7 +17,17 @@ export const getUsers = async (req, res) => {
   }
 };
 
-// Get user by ID
+export const getFarmers = async (req, res) => {
+  try {
+    const farmers = await getAllFarmers();
+    // console.log("Farmers:", farmers);
+    res.json(farmers);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
 export const getUserById = async (req, res) => {
   const userId = req.params.id;
   try {
@@ -30,12 +40,10 @@ export const getUserById = async (req, res) => {
   }
 };
 
-// Create new user
 export const addNewUser = async (req, res) => {
   try {
     const userData = req.body;
 
-    // Handle uploaded NIC file
     if (req.file) {
       userData.nic_softcopy = {
         filename: req.file.filename,
@@ -43,7 +51,7 @@ export const addNewUser = async (req, res) => {
       };
     }
 
-    if (!userData.division) delete userData.division; // remove empty division
+    if (!userData.division) delete userData.division;
     const newUser = await createUserRepo(userData);
     res.status(201).json(newUser);
   } catch (error) {
@@ -52,7 +60,6 @@ export const addNewUser = async (req, res) => {
   }
 };
 
-// Update user
 export const updateUserById = async (req, res) => {
   const userId = req.params.id;
   try {
@@ -67,7 +74,6 @@ export const updateUserById = async (req, res) => {
   }
 };
 
-// Delete user
 export const deleteUserById = async (req, res) => {
   const userId = req.params.id;
   try {

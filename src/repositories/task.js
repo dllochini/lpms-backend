@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import Task from "../models/task.js"; // Adjust the path if needed
+import Task from "../models/task.js";
 import User from "../models/user.js";
 import WorkDone from "../models/workDone.js";
 
@@ -34,8 +34,9 @@ export const getAllTasksByDiv = async (userId) => {
       return [];
     }
 
-    // find field officers in that division
-    const fieldOfficers = await User.find({ division: divisionId }).select("_id").lean();
+    const fieldOfficers = await User.find({ division: divisionId })
+      .select("_id")
+      .lean();
     const fieldOfficerIds = fieldOfficers.map((fo) => fo._id);
 
     if (!fieldOfficerIds.length) {
@@ -45,8 +46,12 @@ export const getAllTasksByDiv = async (userId) => {
     const tasks = await Task.find({
       assignedTo: { $in: fieldOfficerIds },
       status: "Sent for approval",
-    }).populate({ path: "process", populate: { path: "land" } }).populate("operation").populate("assignedTo")
-      .populate({ path: "resource", populate: { path: "unit" } }).lean();
+    })
+      .populate({ path: "process", populate: { path: "land" } })
+      .populate("operation")
+      .populate("assignedTo")
+      .populate({ path: "resource", populate: { path: "unit" } })
+      .lean();
 
     if (!tasks.length) {
       return [];
@@ -64,7 +69,6 @@ export const getAllTasksByDiv = async (userId) => {
       return acc;
     }, {});
 
-    // attach the workDones array to each task
     const tasksWithWork = tasks.map((t) => {
       const key = String(t._id);
       return {
@@ -81,7 +85,10 @@ export const getAllTasksByDiv = async (userId) => {
 };
 
 export const getTaskById = async (id) => {
-  const task = await Task.findById(id).populate("process").populate("assignedTo").populate("operation");
+  const task = await Task.findById(id)
+    .populate("process")
+    .populate("assignedTo")
+    .populate("operation");
   return task;
 };
 

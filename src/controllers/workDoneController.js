@@ -1,9 +1,8 @@
 import * as workDoneRepo from "../repositories/workDone.js";
 
-// Create WorkDone
 export const createWorkDone = async (req, res) => {
   try {
-    console.log("in create controller");
+    // console.log("in create controller");
     const result = await workDoneRepo.createWorkDone(req.body);
     res.status(201).json(result);
   } catch (err) {
@@ -11,7 +10,6 @@ export const createWorkDone = async (req, res) => {
   }
 };
 
-// Get all WorkDone
 export const getAllWorkDone = async (req, res) => {
   try {
     const results = await workDoneRepo.getAllWorkDone();
@@ -21,7 +19,6 @@ export const getAllWorkDone = async (req, res) => {
   }
 };
 
-// Get WorkDone by ID
 export const getWorkDoneById = async (req, res) => {
   try {
     const result = await workDoneRepo.getWorkDoneById(req.params.id);
@@ -32,7 +29,6 @@ export const getWorkDoneById = async (req, res) => {
   }
 };
 
-// Update WorkDone by ID
 export const updateWorkDone = async (req, res) => {
   try {
     const result = await workDoneRepo.updateWorkDone(req.params.id, req.body);
@@ -43,7 +39,6 @@ export const updateWorkDone = async (req, res) => {
   }
 };
 
-// Delete WorkDone by ID
 export const deleteWorkDone = async (req, res) => {
   try {
     const { workId } = req.params;

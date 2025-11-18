@@ -6,7 +6,6 @@ import Process from "../models/process.js";
 import Bill from "../models/bill.js";
 import Role from "../models/role.js";
 
-// Convert to ObjectId safely
 function toObjectIdMaybe(id) {
   if (!id) return null;
   if (id instanceof mongoose.Types.ObjectId) return id;
@@ -15,21 +14,17 @@ function toObjectIdMaybe(id) {
     : null;
 }
 
-// Get all land IDs for a division
 async function getLandIdsForDivision(divisionId) {
-
   const landIds = await Land.find({
     $or: [{ division: divisionId }, { "division._id": divisionId }],
   }).distinct("_id");
 
-  console.log("DEBUG: getLandIdsForDivision ->", { divisionId, landCount: landIds.length, });
-  
+  // console.log("DEBUG: getLandIdsForDivision ->", { divisionId, landCount: landIds.length, });
+
   return landIds;
 }
 
-// Get all process IDs for a division (via land or division)
 async function getProcessIdsForDivision(divisionId, landIds = []) {
-
   const orConditions = [
     { division: divisionId },
     { "division._id": divisionId },
@@ -37,16 +32,14 @@ async function getProcessIdsForDivision(divisionId, landIds = []) {
   ];
 
   const processIds = await Process.find({ $or: orConditions }).distinct("_id");
-  console.log("hellpDEBUG: getProcessIdsForDivision ->", {
-    divisionId,
-    processCount: processIds.length,
-  });
+  // console.log("hellpDEBUG: getProcessIdsForDivision ->", {
+  //   divisionId,
+  //   processCount: processIds.length,
+  // });
   return processIds;
 }
 
-// Manager Dashboard Repository
 export const managerDashboardRepository = {
-  //Total Registered Lands Card
   async countTotalLandsByDivision(divisionId) {
     // const divisionId = toObjectIdMaybe(divisionId);
     // if (!divisionId) return 0;
@@ -58,7 +51,6 @@ export const managerDashboardRepository = {
     return count;
   },
 
-  //Assigned field officers Card
   async countFieldOfficersByDivision(divisionId) {
     // const divisionId = toObjectIdMaybe(divisionId);
     // if (!divisionId) return 0;
@@ -74,26 +66,22 @@ export const managerDashboardRepository = {
     return count;
   },
 
-  //Pending operations Card
   async countPendingOperationsByDivision(divisionId) {
+    const landIds = await getLandIdsForDivision(divisionId);
+    const processIds = await getProcessIdsForDivision(divisionId, landIds);
 
-  const landIds = await getLandIdsForDivision(divisionId);
-  const processIds = await getProcessIdsForDivision(divisionId, landIds);
+    // console.log(processIds,"show")
 
-  // console.log(processIds,"show")
+    if (!processIds.length) return 0;
 
-  if (!processIds.length) return 0;
+    const count = await Task.countDocuments({
+      status: "In Progress",
+      process: { $in: processIds },
+    });
 
-  const count = await Task.countDocuments({
-    status: "In Progress", //
-    process: { $in: processIds }, // something wrong
-  });
-
-  console.log("Pending operations (division):", count);
-  return count;
-},
-
-  //Pending payments Card
+    // console.log("Pending operations (division):", count);
+    return count;
+  },
   async countPendingBillsByDivision(divisionId) {
     // const divisionId = toObjectIdMaybe(divisionId);
     // if (!divisionId) return 0;
@@ -119,17 +107,16 @@ export const managerDashboardRepository = {
 
     const billIds = await Bill.distinct("_id", query);
 
-    console.log("DEBUG: countPendingBillsByDivision ->", {
-      // divisionId, ok
-      // landIdsCount: landIds.length, ok
-      // processIdsCount: processIds.length, ok
-      billIdsCount: billIds.length,
-    });
+    // console.log("DEBUG: countPendingBillsByDivision ->", {
+    // divisionId, ok
+    // landIdsCount: landIds.length, ok
+    // processIdsCount: processIds.length, ok
+    // billIdsCount: billIds.length,
+    // });
 
     return billIds.length;
   },
-  
-  //Recent Requests datagrid
+
   async getRecentRequestsByDivision(divisionId, limit = 6) {
     const landIds = await getLandIdsForDivision(divisionId);
     const processIds = await getProcessIdsForDivision(divisionId, landIds);
@@ -142,19 +129,19 @@ export const managerDashboardRepository = {
     })
       .sort({ createdAt: -1 })
       .limit(limit)
-      .populate({ path: "assignedTo", select: "_id fullName name" }).populate({path:"operation",select:"name"})
+      .populate({ path: "assignedTo", select: "_id fullName name" })
+      .populate({ path: "operation", select: "name" })
       .populate({ path: "process" })
       .lean();
 
-    console.log("DEBUG: recent requests count:", tasks.length);
+    // console.log("DEBUG: recent requests count:", tasks.length);
     return tasks;
   },
 
-  // Recent Payments datagrid
   async getRecentPaymentsByDivision(divisionId, limit = 6) {
-
     const landIds = await getLandIdsForDivision(divisionId);
     const processIds = await getProcessIdsForDivision(divisionId, landIds);
+    // console.log("DEBUG landIds:", processIds);
 
     const orConditions = [
       { division: divisionId },
@@ -164,34 +151,36 @@ export const managerDashboardRepository = {
         ? [
             { process: { $in: processIds } },
             { processId: { $in: processIds } },
-            { process_id: { $in: processIds } },
+            { "process.id": { $in: processIds } },
           ]
         : []),
     ];
 
     const payments = await Bill.find({
-      $or: orConditions,
       status: "Sent for Manager Approval",
+      $or: [
+        { division: divisionId },
+        { "division._id": divisionId },
+        { land: { $in: landIds } },
+        { process: { $in: processIds } },
+      ],
     })
-      .sort({ created_at: -1 })
+      .sort({ createdAt: -1 })
       .limit(limit)
       .populate({
         path: "process",
         populate: { path: "land", populate: "createdBy" },
       })
-      // .populate({ path: "payer", select: "_id fullName name" }) // ✅ populate payer
       .lean();
-    console.log("DEBUG payments:", payments);
+
+    // console.log("DEBUG payments:", payments);
 
     return payments;
   },
 
-  //main function
   async getOverviewAndRecent(divisionId, options = { recentLimit: 6 }) {
-
-
     const { recentLimit } = options;
-    console.log("options", divisionId, recentLimit)
+    // console.log("options", divisionId, recentLimit)
 
     const maybeId = toObjectIdMaybe(divisionId);
     if (!maybeId) return [];
@@ -221,5 +210,4 @@ export const managerDashboardRepository = {
       recentPayments,
     };
   },
-
 };

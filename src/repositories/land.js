@@ -7,14 +7,19 @@ export const getAllLands = async () => {
 };
 
 export const getLand = async (landId) => {
-  console.log("Fetching land with ID:", landId);
-  const land = await Land.findById(landId).populate("farmer").populate("unit").populate("division");
+  // console.log("Fetching land with ID:", landId);
+  const land = await Land.findById(landId)
+    .populate("farmer")
+    .populate("unit")
+    .populate("division");
   return land;
 };
 
 export const getLandsByFieldOfficer = async (fieldOfficerId) => {
   try {
-    const lands = await Land.find({ createdBy: fieldOfficerId }).populate("farmer").populate("unit");
+    const lands = await Land.find({ createdBy: fieldOfficerId })
+      .populate("farmer")
+      .populate("unit");
     return lands;
   } catch (error) {
     console.error("Error fetching lands by field officer:", error);
@@ -24,7 +29,7 @@ export const getLandsByFieldOfficer = async (fieldOfficerId) => {
 
 export const getLandsByDivision = async (managerId) => {
   try {
-    // 1. Validate input
+    
     if (!managerId) {
       throw new Error("Manager ID is required");
     }
@@ -36,15 +41,18 @@ export const getLandsByDivision = async (managerId) => {
 
     const divisionId = user.division._id;
 
-    const lands = await Land.find({ division: divisionId }).populate("farmer").populate("unit").populate("createdBy").lean();
-    console.log("Manager:", user.fullName, "| Division:", divisionId, "| Lands:", lands.length);
+    const lands = await Land.find({ division: divisionId })
+      .populate("farmer")
+      .populate("unit")
+      .populate("createdBy")
+      .lean();
+    // console.log("Manager:", user.fullName, "| Division:", divisionId, "| Lands:", lands.length);
     return lands;
   } catch (error) {
     console.error("Error fetching lands by division:", error.message);
     throw error;
   }
 };
-
 
 export const createLand = async (landData) => {
   const newLand = await Land.create(landData);

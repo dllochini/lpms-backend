@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const mongodbConnection = async (uri, dbName) => {
     try {
-        if (mongoose.connection.readyState === 1) return mongoose; // already connected
+        if (mongoose.connection.readyState === 1) return mongoose;
 
         await mongoose.connect(uri, {
             dbName,
