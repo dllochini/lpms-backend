@@ -9,6 +9,7 @@ const userSchema = new Schema(
     designation: { type: String, default: null },
     division: { type: Schema.Types.ObjectId, ref: "Division"},
     fullName: String,
+    userId: { type: String, unique: true, required: true },
     nic: String,
     passportNo: { type: Number, default: null },
     email: String,
