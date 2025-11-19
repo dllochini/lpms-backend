@@ -1,3 +1,7 @@
+
+
+// export default higherManagerDashboardRepository;
+
 import mongoose from "mongoose";
 import Land from "../models/land.js";
 import Task from "../models/task.js";
@@ -65,13 +69,24 @@ export const higherManagerDashboardRepository = {
     };
   },
 
+  /**
+   * FIX APPLIED HERE:
+   * 1. Fetches the process documents themselves (including the land ID).
+   * 2. Uses the fetched documents, now correctly named 'processes', in the return statement.
+   */
   async getInProgressLandIds({ landIds } = {}) {
     if (!Array.isArray(landIds) || landIds.length === 0) return [];
 
-    const processIds = await Process.find({ land: { $in: landIds } })
-      .distinct("_id")
+    // 1. Fetch the process documents to get the land ID
+    const processes = await Process.find({ land: { $in: landIds } })
+      .select('_id land') // Select only what is needed: ID and associated land ID
+      .lean()
       .exec();
-    if (!processIds.length) return [];
+      
+    if (!processes.length) return [];
+
+    // Extract process IDs for the next step (Task aggregation)
+    const processIds = processes.map(p => p._id); 
 
     const tasks = await Task.aggregate([
       {
@@ -98,10 +113,14 @@ export const higherManagerDashboardRepository = {
 
     if (!tasks.length) return [];
 
-    const usedProcessIds = new Set(tasks.map((t) => String(t.processIdField)));
-    if (!usedProcessIds.size) return [];
+    // 2. Determine which process IDs are actually 'in progress'
+    const inProgressProcessIds = new Set(tasks.map((t) => String(t.processIdField)));
+    if (!inProgressProcessIds.size) return [];
 
-    return processes.map((p) => p.land);
+    // 3. Filter the original process list and map them to their land IDs
+    return processes
+      .filter(p => inProgressProcessIds.has(String(p._id)))
+      .map((p) => p.land);
   },
 
   async countLandsInProgress({ landIds } = {}) {
@@ -176,17 +195,6 @@ export const higherManagerDashboardRepository = {
     ]).exec();
 
     return coverage.map((c) => ({ divisionId: c._id ?? null, area: c.area }));
-  },
-
-  // --- Progress summary (counts tasks by status for given division) (CLEANED)
-  async getHigherManagerDashboardCardInfo({ divisionId } = {}) {
-    const [overview, graph, progress] = await Promise.all([
-      this.getOverview({ divisionId }),
-      this.getGraphData({ divisionId }),
-      this.getProgress({ divisionId }),
-    ]);
-
-    return { overview, graph, progress };
   },
 
   async getRecentOperations({ divisionId } = {}, limit = 6) {
@@ -265,21 +273,6 @@ export const higherManagerDashboardRepository = {
     return { pending, inProgress, completed };
   },
 
-  // --- Recent operations (using Process as 'operation' here)
-  async getRecentOperations({ divisionId } = {}, limit = 6) {
-    const landIds = await this.getLandIds({ divisionId });
-    const match = landIds.length ? { land: { $in: landIds } } : {};
-    const ops = await Process.find(match).sort({ startDate: -1 }).limit(limit).lean().exec();
-    return ops;
-  },
-
-  // --- Recent payments (assumes a Bill model)
-  async getRecentPayments({ divisionId } = {}, limit = 6) {
-    const bills = await Bill.find({}).sort({ createdAt: -1 }).limit(limit).lean().exec();
-    return bills;
-  },
-
-  // --- NEW HELPER: Get Task Stats for a set of Land IDs ---
   async getTaskStatsForLands(landIds) {
     if (!landIds || landIds.length === 0) {
       return { percentComplete: 0, overdueTasks: 0 };
@@ -302,9 +295,7 @@ export const higherManagerDashboardRepository = {
       }},
       { $project: {
           status: { $toLower: { $ifNull: ["$status", ""] } },
-          // --- IMPORTANT ---
-          // Assumes your Task model has an 'endDate' or 'dueDate' field.
-          // Change "endDate" to your actual field name.
+          // NOTE: Assumes your Task model has an 'endDate' or 'dueDate' field.
           endDate: { $toDate: "$endDate" } 
       }},
       { $group: {
@@ -341,7 +332,6 @@ export const higherManagerDashboardRepository = {
     };
   },
 
-  // --- NEW: Get data for the Division Performance Table ---
   async getDivisionPerformance() {
     // 1. Get all divisions that have lands
     const allLandIds = await this.getLandIds({});
@@ -378,16 +368,15 @@ export const higherManagerDashboardRepository = {
     return performanceData;
   },
 
-  // --- MODIFIED: Combined dashboard for frontend (cards) ---
   async getHigherManagerDashboardCardInfo({ divisionId } = {}) {
     const [overview, graph, progress, divisionPerformance] = await Promise.all([
       this.getOverview({ divisionId }),
       this.getGraphData({ divisionId }),
       this.getProgress({ divisionId }),
-      this.getDivisionPerformance(), // <-- ADDED
+      this.getDivisionPerformance(),
     ]);
 
-    return { overview, graph, progress, divisionPerformance }; // <-- MODIFIED
+    return { overview, graph, progress, divisionPerformance };
   },
 };
 
