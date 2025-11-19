@@ -30,8 +30,12 @@ export const createUnit = async (req, res) => {
 
 export const updateUnit = async (req, res) => {
   try {
-    const updatedUnit = await unitRepository.updateUnit(req.params.id, req.body);
-    if (!updatedUnit) return res.status(404).json({ message: "Unit not found" });
+    const updatedUnit = await unitRepository.updateUnit(
+      req.params.id,
+      req.body
+    );
+    if (!updatedUnit)
+      return res.status(404).json({ message: "Unit not found" });
     res.json(updatedUnit);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -41,7 +45,8 @@ export const updateUnit = async (req, res) => {
 export const deleteUnit = async (req, res) => {
   try {
     const deletedUnit = await unitRepository.deleteUnit(req.params.id);
-    if (!deletedUnit) return res.status(404).json({ message: "Unit not found" });
+    if (!deletedUnit)
+      return res.status(404).json({ message: "Unit not found" });
     res.json({ message: "Unit deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });

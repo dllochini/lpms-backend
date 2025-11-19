@@ -1,25 +1,21 @@
 import Operation from "../models/operation.js";
 
-// Get all operations
 export const getAllOperations = async () => {
   const operations = await Operation.find();
   return operations;
 };
 
-// Get single operation by ID
 export const getOperationById = async (operationID) => {
   const operation = await Operation.findById(operationID);
   return operation;
 };
 
-// Create new operation
 export const createNewOperation = async (operationData) => {
   const operation = new Operation(operationData);
   const newOperation = await operation.save();
   return newOperation;
 };
 
-// Update operation by ID
 export const updateOperationById = async (operationID, updateData) => {
   const updateOperation = await Operation.findByIdAndUpdate(
     operationID,
@@ -29,7 +25,6 @@ export const updateOperationById = async (operationID, updateData) => {
   return updateOperation;
 };
 
-// Delete operation by ID
 export const deleteOperationById = async (operationID) => {
   const deleteOperation = await Operation.findByIdAndDelete(operationID);
   return deleteOperation;

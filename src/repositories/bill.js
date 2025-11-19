@@ -8,7 +8,7 @@ const toOid = (id) => new mongoose.Types.ObjectId(id);
 
 export async function createBillForProcessTransactional({
   processId,
-  processStatusToSet = "Sent for Payment Approval", // optional
+  processStatusToSet = "Sent for Payment Approval",
   billStatus = "Sent for Manager Approval",
   notes = "",
   sessionOptions = {},
@@ -23,11 +23,8 @@ export async function createBillForProcessTransactional({
     let createdBill = null;
 
     await session.withTransaction(async () => {
-      // 1) aggregate tasks with resources and workdones, compute amounts
       const tasks = await Task.aggregate([
         { $match: { process: procOid } },
-
-        // lookup resource to get unitPrice (adjust collection name if different)
         {
           $lookup: {
             from: "resources",
@@ -37,8 +34,6 @@ export async function createBillForProcessTransactional({
           },
         },
         { $unwind: { path: "$resource", preserveNullAndEmptyArrays: true } },
-
-        // lookup workdones
         {
           $lookup: {
             from: "workdone",
@@ -47,8 +42,6 @@ export async function createBillForProcessTransactional({
             as: "workDones",
           },
         },
-
-        // compute each workdone amount = newWork * resource.unitPrice
         {
           $addFields: {
             workDonesWithAmount: {
@@ -68,8 +61,6 @@ export async function createBillForProcessTransactional({
             },
           },
         },
-
-        // sum the workdone amounts to taskTotal
         {
           $addFields: {
             taskTotal: { $sum: "$workDonesWithAmount.amount" },
@@ -84,8 +75,6 @@ export async function createBillForProcessTransactional({
           },
         },
       ]).session(session);
-
-      // 2) build arrays and totals
       const taskSubTotals = [];
       const workdoneSubTotals = [];
       let grandTotal = 0;
@@ -108,8 +97,6 @@ export async function createBillForProcessTransactional({
           }
         }
       }
-
-      // 3) update process status (optional) within same transaction
       await Process.findByIdAndUpdate(
         procOid,
         {
@@ -124,8 +111,6 @@ export async function createBillForProcessTransactional({
         },
         { new: true, session }
       );
-
-      // 4) create the bill document within transaction
       createdBill = await Bill.create(
         [
           {
@@ -139,7 +124,6 @@ export async function createBillForProcessTransactional({
         ],
         { session }
       );
-      // createdBill is an array because create([...], { session }) returns array
       createdBill = createdBill[0];
     }, sessionOptions);
 
@@ -154,17 +138,16 @@ export const getBillsByDivision = async (userId) => {
     if (!userId) {
       throw new Error("Manager ID is required");
     }
-
-    // 1️⃣ Get manager and their division
     const user = await User.findById(userId).populate("division");
     if (!user || !user.division?._id) {
       throw new Error("Manager or their division not found");
     }
 
     const divisionId = user.division._id;
-
-    // 2️⃣ Get all bills and deeply populate
-    const bills = await Bill.find({ status: "Sent for Manager Approval" })
+    // console.log("Manager's division ID:", divisionId);
+    const bills = await Bill.find({
+      status: "Sent for Manager Approval" || "Sent for Payment Approval",
+    })
       .populate({
         path: "process",
         populate: {
@@ -172,7 +155,6 @@ export const getBillsByDivision = async (userId) => {
           populate: "createdBy",
         },
       })
-      // 👇 populate the task details inside each bill’s taskSubTotals array
       .populate({
         path: "taskSubTotals.task",
         populate: [
@@ -180,13 +162,12 @@ export const getBillsByDivision = async (userId) => {
           { path: "resource", populate: { path: "unit" } },
         ],
       })
-      // 👇 populate the workdone details inside each bill’s workdoneSubTotals array
       .populate({
-        path: "workdoneSubTotals.workDone", // adjust based on schema
+        path: "workdoneSubTotals.workDone",
       })
       .lean();
 
-    // 3️⃣ Keep only bills belonging to manager's division
+    // console.log("Fetched bills:", bills);
     const filteredBills = bills.filter(
       (bill) =>
         bill?.process?.land?.division?._id?.toString() === divisionId.toString()
@@ -200,8 +181,7 @@ export const getBillsByDivision = async (userId) => {
 };
 
 export const updateBill = async (billId, updateData) => {
-
-  console.log("updating bill in repo",billId,updateData);
+  // console.log("updating bill in repo",billId,updateData);
 
   const updated = await Bill.findByIdAndUpdate(String(billId), updateData, {
     new: true,

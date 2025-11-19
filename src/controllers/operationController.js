@@ -6,7 +6,6 @@ import {
   deleteOperationById,
 } from "../repositories/operation.js";
 
-// Get all operations
 export const getOperations = async (req, res) => {
   try {
     const operations = await getAllOperations();
@@ -17,7 +16,6 @@ export const getOperations = async (req, res) => {
   }
 };
 
-// Get operation by ID
 export const getOperation = async (req, res) => {
   try {
     const operation = await getOperationById(req.params.id);
@@ -29,7 +27,6 @@ export const getOperation = async (req, res) => {
   }
 };
 
-// Create operation
 export const createOperation = async (req, res) => {
   try {
     const operation = await createNewOperation(req.body);
@@ -39,7 +36,6 @@ export const createOperation = async (req, res) => {
   }
 };
 
-// Update operation
 export const updateOperation = async (req, res) => {
   try {
     const operation = await updateOperationById(req.params.id, req.body);
@@ -51,7 +47,6 @@ export const updateOperation = async (req, res) => {
   }
 };
 
-// Delete operation
 export const deleteOperation = async (req, res) => {
   try {
     const operation = await deleteOperationById(req.params.id);

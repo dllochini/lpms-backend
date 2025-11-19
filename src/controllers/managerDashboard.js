@@ -8,7 +8,9 @@ export const getManagerDashboardCardInfo = async (req, res) => {
       return res.status(400).json({ message: "Division ID is required" });
     }
 
-    const data = await managerDashboardRepository.getOverviewAndRecent(divisionId);
+    const data = await managerDashboardRepository.getOverviewAndRecent(
+      divisionId
+    );
 
     res.status(200).json({
       totalLands: data.totalLands || 0,
