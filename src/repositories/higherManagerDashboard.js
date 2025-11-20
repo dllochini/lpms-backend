@@ -71,6 +71,7 @@ export const higherManagerDashboardRepository = {
     const processIds = await Process.find({ land: { $in: landIds } })
       .distinct("_id")
       .exec();
+      console.log("Process IDs found:", processIds);
     if (!processIds.length) return [];
 
     const tasks = await Task.aggregate([
@@ -83,18 +84,20 @@ export const higherManagerDashboardRepository = {
           ],
         },
       },
-      {
-        $project: {
-          status: { $toLower: { $ifNull: ["$status", ""] } },
-          processIdField: { $ifNull: ["$process", "$processId", "$processID"] },
-        },
-      },
+      // {
+      //   $project: {
+      //     status: { $toLower: { $coalesce: ["$status", ""] } },
+      //     processIdField: { $coalesce: ["$process", "$processId", "$processID"] },
+      //   },
+      // },
       {
         $match: {
           status: { $in: STATUS_IN_PROGRESS },
         },
       },
     ]).exec();
+
+    console.log("Tasks found:", tasks);
 
     if (!tasks.length) return [];
 
